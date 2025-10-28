@@ -9,13 +9,17 @@ echo "Testing GitHub search for: $REPO"
 echo "Date range: $START_DATE to $END_DATE"
 echo ""
 
-echo "=== Testing PR search ==="
-gh search prs --repo "$REPO" "is:pr is:merged merged:${START_DATE}..${END_DATE}" --json number,title,mergedAt --limit 10
+echo "=== Testing PR search (with repo: in query) ==="
+gh search prs "repo:${REPO} is:pr is:merged merged:${START_DATE}..${END_DATE}" --json number,title,closedAt --limit 10
 echo ""
 
 echo "=== Testing Issue search ==="
-gh search issues --repo "$REPO" "is:issue is:closed closed:${START_DATE}..${END_DATE}" --json number,title,closedAt --limit 10
+gh search issues "repo:${REPO} is:issue is:closed closed:${START_DATE}..${END_DATE}" --json number,title,closedAt --limit 10
 echo ""
 
 echo "=== Testing alternative: gh pr list ==="
-gh pr list --repo "$REPO" --state merged --search "merged:${START_DATE}..${END_DATE}" --json number,title,mergedAt --limit 10
+gh pr list --repo "$REPO" --state merged --limit 10 --json number,title,closedAt,createdAt | jq --arg start "$START_DATE" --arg end "$END_DATE" '[.[] | select(.closedAt >= $start and .closedAt <= ($end + "T23:59:59Z"))]'
+echo ""
+
+echo "=== Checking repo access ==="
+gh api repos/${REPO} --jq '{name: .name, full_name: .full_name, private: .private}' 2>&1 || echo "Cannot access repository"
