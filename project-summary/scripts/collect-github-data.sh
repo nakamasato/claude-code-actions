@@ -85,13 +85,14 @@ for repo in "${REPOS[@]}"; do
   fi
 
   # Transform data to match spec format
+  # Use --slurpfile to avoid "Argument list too long" error with large datasets
   jq -n \
     --arg repo "$repo" \
-    --argjson prs "$(cat "$TMP_DIR/${repo//\//_}_prs.json")" \
-    --argjson issues "$(cat "$TMP_DIR/${repo//\//_}_issues.json")" \
+    --slurpfile prs "$TMP_DIR/${repo//\//_}_prs.json" \
+    --slurpfile issues "$TMP_DIR/${repo//\//_}_issues.json" \
     '{
       name: $repo,
-      pull_requests: ($prs | map({
+      pull_requests: ($prs[0] | map({
         number: .number,
         title: .title,
         body: .body,
@@ -100,7 +101,7 @@ for repo in "${REPOS[@]}"; do
         author: .author.login,
         labels: [.labels[].name]
       })),
-      issues: ($issues | map({
+      issues: ($issues[0] | map({
         number: .number,
         title: .title,
         body: .body,
