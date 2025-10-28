@@ -21,15 +21,24 @@ fi
 
 echo "✓ Template file found: $TEMPLATE_FILE"
 
-# Extract template fields using basic parsing (yq would be better, but keeping dependencies minimal)
-# For now, we'll just verify the file exists and can be read
-# The actual template content will be processed by Claude Code
+# Extract template fields
+# system_prompt
+if [[ -n "$INPUT_SYSTEM_PROMPT" ]]; then
+  echo "Using custom system_prompt (overriding template)"
+  SYSTEM_PROMPT="$INPUT_SYSTEM_PROMPT"
+else
+  echo "Extracting system_prompt from template"
+  SYSTEM_PROMPT=$(awk '/^system_prompt:/ {flag=1; next} /^[a-z_]+:/ {flag=0} flag' "$TEMPLATE_FILE" | sed 's/^  //')
+fi
 
-# Read template content
-TEMPLATE_CONTENT=$(cat "$TEMPLATE_FILE")
-
-# Extract system prompt
-SYSTEM_PROMPT=$(awk '/^system_prompt:/ {flag=1; next} /^[a-z_]+:/ {flag=0} flag' "$TEMPLATE_FILE" | sed 's/^  //')
+# output_format
+if [[ -n "$INPUT_OUTPUT_FORMAT" ]]; then
+  echo "Using custom output_format (overriding template)"
+  OUTPUT_FORMAT="$INPUT_OUTPUT_FORMAT"
+else
+  echo "Extracting output_format from template"
+  OUTPUT_FORMAT=$(awk '/^output_format:/ {flag=1; next} /^[a-z_]+:/ {flag=0} flag' "$TEMPLATE_FILE" | sed 's/^  //')
+fi
 
 # Extract language
 LANGUAGE=$(grep "^language:" "$TEMPLATE_FILE" | cut -d':' -f2 | xargs)
@@ -54,41 +63,36 @@ echo "TEMPLATE_NAME=$TEMPLATE_NAME" >> "$GITHUB_OUTPUT"
 echo "LANGUAGE=$LANGUAGE" >> "$GITHUB_OUTPUT"
 echo "TONE=$TONE" >> "$GITHUB_OUTPUT"
 
+# Save system_prompt to output (multiline)
+{
+  echo "SYSTEM_PROMPT<<EOF_SYSTEM_PROMPT"
+  echo "$SYSTEM_PROMPT"
+  echo "EOF_SYSTEM_PROMPT"
+} >> "$GITHUB_OUTPUT"
+
+# Save output_format to output (multiline)
+{
+  echo "OUTPUT_FORMAT<<EOF_OUTPUT_FORMAT"
+  echo "$OUTPUT_FORMAT"
+  echo "EOF_OUTPUT_FORMAT"
+} >> "$GITHUB_OUTPUT"
+
 # Save template file path for Claude Code to read
 echo "TEMPLATE_FILE=$TEMPLATE_FILE" >> "$GITHUB_OUTPUT"
-
-# Create a summary file for Claude Code with template guidance
-cat > template_guidance.md <<EOF
-# Template: $TEMPLATE_NAME
-
-## Language
-$LANGUAGE
-
-## Tone
-$TONE
-
-## Custom Instructions
-${INPUT_CUSTOM_INSTRUCTIONS:-None}
-
-## Template File
-The full template definition is available at: $TEMPLATE_FILE
-
-Please read this file to understand:
-- System prompt and guidelines
-- Output format structure
-- Category definitions
-- Slack formatting instructions
-- Notion formatting instructions
-
-Apply any custom instructions while maintaining the template's core structure.
-EOF
-
-echo "template-guidance-file=template_guidance.md" >> "$GITHUB_OUTPUT"
 
 echo "✓ Template loaded successfully"
 echo "  Template: $TEMPLATE_NAME"
 echo "  Language: $LANGUAGE"
 echo "  Tone: $TONE"
-echo "  Custom instructions: ${INPUT_CUSTOM_INSTRUCTIONS:-(none)}"
+if [[ -n "$INPUT_SYSTEM_PROMPT" ]]; then
+  echo "  System prompt: Custom (overridden)"
+else
+  echo "  System prompt: From template"
+fi
+if [[ -n "$INPUT_OUTPUT_FORMAT" ]]; then
+  echo "  Output format: Custom (overridden)"
+else
+  echo "  Output format: From template"
+fi
 
 echo "::endgroup::"

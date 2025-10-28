@@ -11,6 +11,8 @@ TEMPLATE_FILE="${TEMPLATE_FILE}"
 TEMPLATE_NAME="${TEMPLATE_NAME}"
 LANGUAGE="${LANGUAGE}"
 TONE="${TONE}"
+SYSTEM_PROMPT="${SYSTEM_PROMPT}"
+OUTPUT_FORMAT="${OUTPUT_FORMAT}"
 
 # Get data file paths
 GITHUB_DATA_FILE="${GITHUB_DATA_FILE:-}"
@@ -39,30 +41,21 @@ You are tasked with generating a comprehensive project summary based on the prov
 
 PROMPT_START
 
-# Add template file reference
+# Add template information
 cat >> claude_prompt.md <<EOF
 - **Template**: $TEMPLATE_NAME
 - **Language**: $LANGUAGE
 - **Tone**: $TONE
-- **Template File**: $TEMPLATE_FILE
 
-Please read the template file to understand:
-- System prompt and guidelines
-- Output format structure
-- Category definitions
-- Formatting instructions
+## System Prompt
 
-EOF
+$SYSTEM_PROMPT
 
-# Add custom instructions if provided
-if [[ -n "$INPUT_CUSTOM_INSTRUCTIONS" ]]; then
-  cat >> claude_prompt.md <<EOF
-### Custom Instructions
+## Output Format
 
-$INPUT_CUSTOM_INSTRUCTIONS
+$OUTPUT_FORMAT
 
 EOF
-fi
 
 # Add data sources section
 cat >> claude_prompt.md <<'EOF'
@@ -112,24 +105,21 @@ fi
 cat >> claude_prompt.md <<'EOF'
 ## Processing Steps
 
-1. **Read Template**: Use the Read tool to load the template file and understand the requirements
+1. **Load Data**: Use the Read tool to load all available data files (GitHub and/or Slack)
 
-2. **Load Data**: Use the Read tool to load all available data files (GitHub and/or Slack)
-
-3. **Analyze Content**:
+2. **Analyze Content**:
    - Categorize PRs and Issues according to template categories
    - Identify key themes and topics from Slack discussions
    - Extract important metrics (counts, participation, etc.)
    - Cross-reference GitHub activity with Slack discussions if both are available
 
-4. **Generate Summary**:
-   - Follow the template's output format
+3. **Generate Summary**:
+   - Follow the output format specified above
    - Apply the specified language and tone
-   - Use the template's category definitions
    - Include relevant links and references
    - Keep the content clear, concise, and actionable
 
-5. **Format for Outputs**: Prepare formatted versions for each output destination
+4. **Format for Outputs**: Prepare formatted versions for each output destination
 
 EOF
 

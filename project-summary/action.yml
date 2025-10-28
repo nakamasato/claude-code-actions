@@ -28,12 +28,16 @@ inputs:
 
   # Prompt Configuration
   template:
-    description: 'Template name (monthly-report, sprint-summary, release-notes)'
+    description: 'Template name (monthly-report, sprint-summary, release-notes, weekly-check)'
     required: false
     default: 'monthly-report'
 
-  custom_instructions:
-    description: 'Additional instructions to append to template'
+  system_prompt:
+    description: 'Custom system prompt (overrides template system_prompt if specified)'
+    required: false
+
+  output_format:
+    description: 'Custom output format (overrides template output_format if specified)'
     required: false
 
   language:
@@ -104,7 +108,8 @@ runs:
         INPUT_START_DATE: ${{ inputs.start_date }}
         INPUT_END_DATE: ${{ inputs.end_date }}
         INPUT_TEMPLATE: ${{ inputs.template }}
-        INPUT_CUSTOM_INSTRUCTIONS: ${{ inputs.custom_instructions }}
+        INPUT_SYSTEM_PROMPT: ${{ inputs.system_prompt }}
+        INPUT_OUTPUT_FORMAT: ${{ inputs.output_format }}
         INPUT_LANGUAGE: ${{ inputs.language }}
         INPUT_TONE: ${{ inputs.tone }}
         INPUT_OUTPUTS: ${{ inputs.outputs }}
@@ -171,9 +176,10 @@ runs:
       shell: bash
       env:
         INPUT_TEMPLATE: ${{ inputs.template }}
+        INPUT_SYSTEM_PROMPT: ${{ inputs.system_prompt }}
+        INPUT_OUTPUT_FORMAT: ${{ inputs.output_format }}
         INPUT_LANGUAGE: ${{ inputs.language }}
         INPUT_TONE: ${{ inputs.tone }}
-        INPUT_CUSTOM_INSTRUCTIONS: ${{ inputs.custom_instructions }}
         GITHUB_ACTION_PATH: ${{ github.action_path }}
       run: |
         bash ${{ github.action_path }}/scripts/load-template.sh
@@ -198,17 +204,26 @@ runs:
         TEMPLATE_NAME: ${{ steps.load-template.outputs.TEMPLATE_NAME }}
         LANGUAGE: ${{ steps.load-template.outputs.LANGUAGE }}
         TONE: ${{ steps.load-template.outputs.TONE }}
+        SYSTEM_PROMPT: ${{ steps.load-template.outputs.SYSTEM_PROMPT }}
+        OUTPUT_FORMAT: ${{ steps.load-template.outputs.OUTPUT_FORMAT }}
         GITHUB_DATA_FILE: ${{ steps.github-data.outputs.github-data-file }}
         SLACK_DATA_FILE: ${{ steps.slack-data.outputs.slack-data-file }}
         PERIOD_DESCRIPTION: ${{ steps.parse-period.outputs.PERIOD_DESCRIPTION }}
         START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
         END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
-        INPUT_CUSTOM_INSTRUCTIONS: ${{ inputs.custom_instructions }}
         INPUT_OUTPUTS: ${{ inputs.outputs }}
         INPUT_NOTIFICATION_SLACK_CHANNEL: ${{ inputs.notification_slack_channel }}
         INPUT_NOTION_DATABASE_ID: ${{ inputs.notion_database_id }}
       run: |
         bash ${{ github.action_path }}/scripts/build-prompt.sh
+
+    - name: Verify git repository context
+      shell: bash
+      run: |
+        echo "Current directory: $(pwd)"
+        echo "Git status check:"
+        git rev-parse --git-dir || echo "Warning: Not in a git repository"
+        ls -la
 
     - name: Run Claude Code with MCP
       id: claude-code

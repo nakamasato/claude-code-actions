@@ -34,9 +34,15 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `template` | No | `monthly-report` | Template: `monthly-report`, `sprint-summary`, `release-notes`, `weekly-check` |
-| `custom_instructions` | No | - | Additional instructions for the AI |
+| `system_prompt` | No | - | Custom system prompt (overrides template's system_prompt) |
+| `output_format` | No | - | Custom output format (overrides template's output_format) |
 | `language` | No | - | Output language (`en`, `ja`, etc.) |
 | `tone` | No | - | Tone: `formal`, `casual`, `technical` |
+
+**Note**: `system_prompt` and `output_format` override the corresponding template values. You can specify:
+- Both to create a fully custom report (template structure ignored)
+- One to partially customize (e.g., custom format with template's system prompt)
+- Neither to use the template as-is
 
 ### Output Configuration
 
@@ -230,6 +236,39 @@ jobs:
 - Maximum 1000 Slack messages per channel
 - Bot messages automatically filtered from Slack data
 - Templates are built-in only (custom templates: future enhancement)
+
+## Troubleshooting
+
+### "fatal: not in a git directory" Error
+
+When running the action, you may see this error during the Claude Code preparation phase:
+
+```
+fatal: not in a git directory
+Failed to configure git authentication
+```
+
+**Cause**: This occurs when `claude-code-action` is called from within a composite action and tries to configure git.
+
+**Solution**: This error can be safely ignored in most cases. The action will continue to execute normally. To suppress this warning:
+
+1. Ensure your workflow has `actions/checkout@v4` before calling this action
+2. Add a verification step in your workflow:
+
+```yaml
+- name: Checkout repository
+  uses: actions/checkout@v4
+
+- name: Verify git context
+  run: git status
+
+- name: Run Project Summary
+  uses: nakamasato/claude-code-actions/project-summary@v1
+  with:
+    # ... your inputs
+```
+
+If the error persists and affects execution, please file an issue.
 
 ## Privacy Considerations
 

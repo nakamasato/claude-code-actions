@@ -32,17 +32,6 @@ for repo in "${REPOS[@]}"; do
   echo "  - $repo"
 done
 
-# Initialize JSON structure
-cat > github_data.json <<EOF
-{
-  "repositories": [],
-  "period": {
-    "start": "${START_DATE}T00:00:00Z",
-    "end": "${END_DATE}T23:59:59Z"
-  }
-}
-EOF
-
 # Temporary directory for individual repo data
 TMP_DIR=$(mktemp -d)
 trap "rm -rf $TMP_DIR" EXIT
@@ -131,28 +120,44 @@ echo "=========================================="
 echo "Combining data from all repositories..."
 echo "=========================================="
 
-# Build repositories array
-REPO_JSONS=""
+# Collect all repository JSON files into an array using jq
+REPO_FILES=()
 for repo in "${REPOS[@]}"; do
   repo=$(echo "$repo" | xargs)
   if [[ -f "$TMP_DIR/${repo//\//_}_combined.json" ]]; then
-    if [[ -z "$REPO_JSONS" ]]; then
-      REPO_JSONS=$(cat "$TMP_DIR/${repo//\//_}_combined.json")
-    else
-      REPO_JSONS="$REPO_JSONS,$(cat "$TMP_DIR/${repo//\//_}_combined.json")"
-    fi
+    REPO_FILES+=("$TMP_DIR/${repo//\//_}_combined.json")
   fi
 done
 
-# Update github_data.json with all repositories
-jq \
-  --argjson repos "[$REPO_JSONS]" \
-  '.repositories = $repos' \
-  github_data.json > github_data_tmp.json && mv github_data_tmp.json github_data.json
+# Use jq to read all files and combine them into repositories array
+# This avoids the "Argument list too long" error by reading from files instead of command line args
+if [[ ${#REPO_FILES[@]} -gt 0 ]]; then
+  jq -n '[inputs]' "${REPO_FILES[@]}" | \
+    jq --arg period "$START_DATE to $END_DATE" \
+       --arg start "$START_DATE" \
+       --arg end "$END_DATE" \
+       '{
+         period: $period,
+         start_date: $start,
+         end_date: $end,
+         repositories: .
+       }' > github_data.json
+else
+  echo "Warning: No repository data files found"
+  # Create empty structure
+  cat > github_data.json <<EOF
+{
+  "period": "$START_DATE to $END_DATE",
+  "start_date": "$START_DATE",
+  "end_date": "$END_DATE",
+  "repositories": []
+}
+EOF
+fi
 
-# Calculate totals
-TOTAL_PRS=$(jq '[.repositories[].pull_requests | length] | add' github_data.json)
-TOTAL_ISSUES=$(jq '[.repositories[].issues | length] | add' github_data.json)
+# Calculate totals (use 0 as default if null)
+TOTAL_PRS=$(jq '[.repositories[].pull_requests | length] | add // 0' github_data.json)
+TOTAL_ISSUES=$(jq '[.repositories[].issues | length] | add // 0' github_data.json)
 
 echo "✓ GitHub data collection complete"
 echo "  Total PRs: $TOTAL_PRS"
