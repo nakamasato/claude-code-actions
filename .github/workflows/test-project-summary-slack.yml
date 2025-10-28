@@ -35,7 +35,6 @@ jobs:
           INPUT_ANTHROPIC_API_KEY: 'dummy'
           INPUT_PERIOD: ${{ github.event.inputs.period }}
           INPUT_TEMPLATE: 'monthly-report'
-          INPUT_TIMEOUT_MINUTES: '10'
         run: |
           bash project-summary/scripts/validate-inputs.sh
 

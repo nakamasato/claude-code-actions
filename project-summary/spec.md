@@ -183,13 +183,9 @@ inputs:
   anthropic_api_key:
     description: 'Anthropic API Key'
     required: false
-
-  # Execution Config
-  timeout_minutes:
-    description: 'Timeout in minutes for Claude Code execution'
-    required: false
-    default: '10'
 ```
+
+**Note**: Timeout should be set at the workflow job level using `timeout-minutes`, not as an action input.
 
 ## Technical Architecture
 

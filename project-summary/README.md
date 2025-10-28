@@ -64,9 +64,16 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 | `github_token` | No | `${{ github.token }}` | GitHub Token (supports GitHub App tokens) |
 | `anthropic_api_key` | No* | - | Anthropic API Key |
 | `claude_code_oauth_token` | No* | - | Claude Code OAuth Token |
-| `timeout_minutes` | No | `10` | Claude Code execution timeout |
 
 *Either `anthropic_api_key` or `claude_code_oauth_token` required
+
+**Note**: To set a timeout for the action, use `timeout-minutes` at the job or step level in your workflow:
+```yaml
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # Set timeout at job level
+```
 
 ## Outputs
 

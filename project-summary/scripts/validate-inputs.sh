@@ -138,15 +138,6 @@ if [[ -n "$INPUT_TONE" ]]; then
   fi
 fi
 
-# Validate timeout
-if [[ -n "$INPUT_TIMEOUT_MINUTES" ]]; then
-  if ! [[ "$INPUT_TIMEOUT_MINUTES" =~ ^[0-9]+$ ]]; then
-    print_error "timeout_minutes must be a positive integer"
-  elif [[ "$INPUT_TIMEOUT_MINUTES" -lt 1 || "$INPUT_TIMEOUT_MINUTES" -gt 60 ]]; then
-    print_warning "timeout_minutes should be between 1 and 60 minutes"
-  fi
-fi
-
 # Summary
 echo ""
 echo "=========================================="

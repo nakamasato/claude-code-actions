@@ -19,6 +19,7 @@ on:
 jobs:
   test-e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,4 +42,3 @@ jobs:
           slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          timeout_minutes: 10
