@@ -122,7 +122,7 @@ fi
 
 # Validate template
 if [[ -n "$INPUT_TEMPLATE" ]]; then
-  valid_templates=("monthly-report" "sprint-summary" "release-notes")
+  valid_templates=("monthly-report" "sprint-summary" "release-notes" "weekly-check")
   if [[ ! " ${valid_templates[*]} " =~ " ${INPUT_TEMPLATE} " ]]; then
     print_error "Invalid template: '$INPUT_TEMPLATE'. Valid options: ${valid_templates[*]}"
   else
