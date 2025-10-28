@@ -36,8 +36,16 @@ inputs:
     description: 'Custom system prompt (overrides template system_prompt if specified)'
     required: false
 
-  output_format:
-    description: 'Custom output format (overrides template output_format if specified)'
+  slack_output_format:
+    description: 'Custom Slack output format (overrides template slack_output_format if specified)'
+    required: false
+
+  notion_title_format:
+    description: 'Notion page title format. Variables: {period}, {start_date}, {end_date}, {template}. Example: "📊 {period} Report"'
+    required: false
+
+  notion_output_format:
+    description: 'Custom Notion output format (overrides template notion_output_format if specified)'
     required: false
 
   language:
@@ -103,7 +111,9 @@ runs:
         INPUT_END_DATE: ${{ inputs.end_date }}
         INPUT_TEMPLATE: ${{ inputs.template }}
         INPUT_SYSTEM_PROMPT: ${{ inputs.system_prompt }}
-        INPUT_OUTPUT_FORMAT: ${{ inputs.output_format }}
+        INPUT_SLACK_OUTPUT_FORMAT: ${{ inputs.slack_output_format }}
+        INPUT_NOTION_TITLE_FORMAT: ${{ inputs.notion_title_format }}
+        INPUT_NOTION_OUTPUT_FORMAT: ${{ inputs.notion_output_format }}
         INPUT_LANGUAGE: ${{ inputs.language }}
         INPUT_TONE: ${{ inputs.tone }}
         INPUT_OUTPUTS: ${{ inputs.outputs }}
@@ -170,7 +180,9 @@ runs:
       env:
         INPUT_TEMPLATE: ${{ inputs.template }}
         INPUT_SYSTEM_PROMPT: ${{ inputs.system_prompt }}
-        INPUT_OUTPUT_FORMAT: ${{ inputs.output_format }}
+        INPUT_SLACK_OUTPUT_FORMAT: ${{ inputs.slack_output_format }}
+        INPUT_NOTION_TITLE_FORMAT: ${{ inputs.notion_title_format }}
+        INPUT_NOTION_OUTPUT_FORMAT: ${{ inputs.notion_output_format }}
         INPUT_LANGUAGE: ${{ inputs.language }}
         INPUT_TONE: ${{ inputs.tone }}
         GITHUB_ACTION_PATH: ${{ github.action_path }}
@@ -198,7 +210,9 @@ runs:
         LANGUAGE: ${{ steps.load-template.outputs.LANGUAGE }}
         TONE: ${{ steps.load-template.outputs.TONE }}
         SYSTEM_PROMPT: ${{ steps.load-template.outputs.SYSTEM_PROMPT }}
-        OUTPUT_FORMAT: ${{ steps.load-template.outputs.OUTPUT_FORMAT }}
+        SLACK_OUTPUT_FORMAT: ${{ steps.load-template.outputs.SLACK_OUTPUT_FORMAT }}
+        NOTION_TITLE_FORMAT: ${{ steps.load-template.outputs.NOTION_TITLE_FORMAT }}
+        NOTION_OUTPUT_FORMAT: ${{ steps.load-template.outputs.NOTION_OUTPUT_FORMAT }}
         GITHUB_DATA_FILE: ${{ steps.github-data.outputs.github-data-file }}
         SLACK_DATA_FILE: ${{ steps.slack-data.outputs.slack-data-file }}
         PERIOD_DESCRIPTION: ${{ steps.parse-period.outputs.PERIOD_DESCRIPTION }}
