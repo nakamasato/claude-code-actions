@@ -18,7 +18,7 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `repositories` | No | - | Comma-separated repositories (`owner/repo,owner/repo2`) |
+| `github_repositories` | No | - | Comma-separated repositories (`owner/repo,owner/repo2`) |
 | `slack_channels` | No | - | Comma-separated Slack channel IDs (`C123,C456`) |
 
 ### Time Period
@@ -43,7 +43,7 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `outputs` | **Yes** | - | Outputs: `slack`, `notion`, or `slack,notion` |
-| `slack_channel` | No* | - | Slack channel ID for posting |
+| `notification_slack_channel` | No* | - | Slack channel ID for posting |
 | `slack_bot_token` | No* | - | Slack Bot Token |
 | `slack_team_id` | No* | - | Slack Team ID |
 | `notion_database_id` | No* | - | Notion database ID |
@@ -79,9 +79,9 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 - name: Generate monthly summary
   uses: nakamasato/claude-code-actions/project-summary@v1
   with:
-    repositories: myorg/backend,myorg/frontend
+    github_repositories: myorg/backend,myorg/frontend
     outputs: slack
-    slack_channel: C1234567890
+    notification_slack_channel: C1234567890
     slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
     slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -93,12 +93,12 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 - name: Generate sprint summary
   uses: nakamasato/claude-code-actions/project-summary@v1
   with:
-    repositories: myorg/api
+    github_repositories: myorg/api
     slack_channels: C1234567890,C0987654321
     period: last-14-days
     template: sprint-summary
     outputs: slack,notion
-    slack_channel: C1234567890
+    notification_slack_channel: C1234567890
     notion_database_id: ${{ secrets.NOTION_DB_ID }}
     slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
     slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
@@ -120,7 +120,7 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 - name: Generate release notes
   uses: nakamasato/claude-code-actions/project-summary@v1
   with:
-    repositories: target-org/repo1,target-org/repo2
+    github_repositories: target-org/repo1,target-org/repo2
     start_date: 2024-01-01
     end_date: 2024-01-31
     template: release-notes
@@ -147,10 +147,10 @@ jobs:
       - name: Generate monthly summary
         uses: nakamasato/claude-code-actions/project-summary@v1
         with:
-          repositories: ${{ github.repository }}
+          github_repositories: ${{ github.repository }}
           slack_channels: C1234567890
           outputs: slack
-          slack_channel: C1234567890
+          notification_slack_channel: C1234567890
           slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
           slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

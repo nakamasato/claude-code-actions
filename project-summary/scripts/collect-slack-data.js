@@ -6,7 +6,7 @@
  */
 
 import { WebClient } from '@slack/web-api';
-import { writeFileSync } from 'fs';
+import { writeFileSync, appendFileSync } from 'fs';
 
 // Configuration from environment variables
 const SLACK_BOT_TOKEN = process.env.INPUT_SLACK_BOT_TOKEN || process.env.SLACK_BOT_TOKEN;
@@ -215,10 +215,9 @@ async function main() {
 
   // Set GitHub Actions output
   if (process.env.GITHUB_OUTPUT) {
-    const fs = require('fs');
-    fs.appendFileSync(process.env.GITHUB_OUTPUT, `slack-data-file=${outputFile}\n`);
-    fs.appendFileSync(process.env.GITHUB_OUTPUT, `total-messages=${totalMessages}\n`);
-    fs.appendFileSync(process.env.GITHUB_OUTPUT, `total-replies=${totalReplies}\n`);
+    appendFileSync(process.env.GITHUB_OUTPUT, `slack-data-file=${outputFile}\n`);
+    appendFileSync(process.env.GITHUB_OUTPUT, `total-messages=${totalMessages}\n`);
+    appendFileSync(process.env.GITHUB_OUTPUT, `total-replies=${totalReplies}\n`);
   }
 }
 

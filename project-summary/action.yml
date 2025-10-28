@@ -4,7 +4,7 @@ author: 'nakamasato'
 
 inputs:
   # Data Sources
-  repositories:
+  github_repositories:
     description: 'Comma-separated list of repositories (owner/repo format). Example: org/repo1,org/repo2'
     required: false
 
@@ -50,7 +50,7 @@ inputs:
     required: true
 
   # Slack Output Config
-  slack_channel:
+  notification_slack_channel:
     description: 'Slack channel ID for posting results'
     required: false
 
@@ -98,7 +98,7 @@ runs:
       id: validate
       shell: bash
       env:
-        INPUT_REPOSITORIES: ${{ inputs.repositories }}
+        INPUT_GITHUB_REPOSITORIES: ${{ inputs.github_repositories }}
         INPUT_SLACK_CHANNELS: ${{ inputs.slack_channels }}
         INPUT_PERIOD: ${{ inputs.period }}
         INPUT_START_DATE: ${{ inputs.start_date }}
@@ -108,7 +108,7 @@ runs:
         INPUT_LANGUAGE: ${{ inputs.language }}
         INPUT_TONE: ${{ inputs.tone }}
         INPUT_OUTPUTS: ${{ inputs.outputs }}
-        INPUT_SLACK_CHANNEL: ${{ inputs.slack_channel }}
+        INPUT_NOTIFICATION_SLACK_CHANNEL: ${{ inputs.notification_slack_channel }}
         INPUT_SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
         INPUT_SLACK_TEAM_ID: ${{ inputs.slack_team_id }}
         INPUT_NOTION_DATABASE_ID: ${{ inputs.notion_database_id }}
@@ -131,11 +131,11 @@ runs:
 
     - name: Collect GitHub data
       id: github-data
-      if: inputs.repositories != ''
+      if: inputs.github_repositories != ''
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
-        INPUT_REPOSITORIES: ${{ inputs.repositories }}
+        INPUT_GITHUB_REPOSITORIES: ${{ inputs.github_repositories }}
         START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
         END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
       run: |
@@ -205,7 +205,7 @@ runs:
         END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
         INPUT_CUSTOM_INSTRUCTIONS: ${{ inputs.custom_instructions }}
         INPUT_OUTPUTS: ${{ inputs.outputs }}
-        INPUT_SLACK_CHANNEL: ${{ inputs.slack_channel }}
+        INPUT_NOTIFICATION_SLACK_CHANNEL: ${{ inputs.notification_slack_channel }}
         INPUT_NOTION_DATABASE_ID: ${{ inputs.notion_database_id }}
       run: |
         bash ${{ github.action_path }}/scripts/build-prompt.sh
@@ -225,13 +225,13 @@ runs:
         prompt: ${{ steps.build-prompt.outputs.prompt }}
 
     - name: Send error notification to Slack
-      if: failure() && inputs.slack_channel != '' && inputs.slack_bot_token != ''
+      if: failure() && inputs.notification_slack_channel != '' && inputs.slack_bot_token != ''
       shell: bash
       run: |
         curl -X POST -H 'Content-type: application/json' \
           -H "Authorization: Bearer ${{ inputs.slack_bot_token }}" \
           -d '{
-            "channel": "${{ inputs.slack_channel }}",
+            "channel": "${{ inputs.notification_slack_channel }}",
             "text": "⚠️ *Project Summary generation failed*\n\nRepository: ${{ github.repository }}\nWorkflow: ${{ github.workflow }}\n\nSee details: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>",
             "mrkdwn": true
           }' \

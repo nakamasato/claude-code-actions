@@ -22,9 +22,9 @@ jobs:
       - name: Test input validation and period parsing
         shell: bash
         env:
-          INPUT_REPOSITORIES: ${{ github.event.inputs.repositories }}
+          INPUT_GITHUB_REPOSITORIES: ${{ github.event.inputs.repositories }}
           INPUT_OUTPUTS: 'slack'
-          INPUT_SLACK_CHANNEL: 'C1234567890'
+          INPUT_NOTIFICATION_SLACK_CHANNEL: 'C1234567890'
           INPUT_SLACK_BOT_TOKEN: 'dummy'
           INPUT_SLACK_TEAM_ID: 'dummy'
           INPUT_ANTHROPIC_API_KEY: 'dummy'
@@ -46,7 +46,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INPUT_REPOSITORIES: ${{ github.event.inputs.repositories }}
+          INPUT_GITHUB_REPOSITORIES: ${{ github.event.inputs.repositories }}
           START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
           END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
         run: |

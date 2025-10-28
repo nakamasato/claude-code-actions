@@ -31,8 +31,8 @@ print_success() {
 }
 
 # Validate at least one data source is specified
-if [[ -z "$INPUT_REPOSITORIES" && -z "$INPUT_SLACK_CHANNELS" ]]; then
-  print_error "At least one data source must be specified: 'repositories' or 'slack_channels'"
+if [[ -z "$INPUT_GITHUB_REPOSITORIES" && -z "$INPUT_SLACK_CHANNELS" ]]; then
+  print_error "At least one data source must be specified: 'github_repositories' or 'slack_channels'"
 fi
 
 # Validate at least one output is specified
@@ -49,8 +49,8 @@ IFS=',' read -ra OUTPUTS_ARRAY <<< "$INPUT_OUTPUTS"
 if [[ " ${OUTPUTS_ARRAY[*]} " =~ " slack " ]]; then
   echo "Validating Slack output configuration..."
 
-  if [[ -z "$INPUT_SLACK_CHANNEL" ]]; then
-    print_error "Slack output requires 'slack_channel' parameter"
+  if [[ -z "$INPUT_NOTIFICATION_SLACK_CHANNEL" ]]; then
+    print_error "Slack output requires 'notification_slack_channel' parameter"
   fi
 
   if [[ -z "$INPUT_SLACK_BOT_TOKEN" ]]; then
@@ -61,7 +61,7 @@ if [[ " ${OUTPUTS_ARRAY[*]} " =~ " slack " ]]; then
     print_error "Slack output requires 'slack_team_id' parameter"
   fi
 
-  if [[ -n "$INPUT_SLACK_CHANNEL" && -n "$INPUT_SLACK_BOT_TOKEN" && -n "$INPUT_SLACK_TEAM_ID" ]]; then
+  if [[ -n "$INPUT_NOTIFICATION_SLACK_CHANNEL" && -n "$INPUT_SLACK_BOT_TOKEN" && -n "$INPUT_SLACK_TEAM_ID" ]]; then
     print_success "Slack output configuration valid"
   fi
 fi

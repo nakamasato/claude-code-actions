@@ -7,7 +7,7 @@ set -e
 echo "::group::Collecting GitHub data"
 
 # Check if repositories are specified
-if [[ -z "$INPUT_REPOSITORIES" ]]; then
+if [[ -z "$INPUT_GITHUB_REPOSITORIES" ]]; then
   echo "No repositories specified, skipping GitHub data collection"
   echo "::endgroup::"
   exit 0
@@ -25,7 +25,7 @@ fi
 echo "Collecting data for period: $START_DATE to $END_DATE"
 
 # Parse comma-separated repository list
-IFS=',' read -ra REPOS <<< "$INPUT_REPOSITORIES"
+IFS=',' read -ra REPOS <<< "$INPUT_GITHUB_REPOSITORIES"
 
 echo "Repositories to process: ${#REPOS[@]}"
 for repo in "${REPOS[@]}"; do

@@ -29,7 +29,7 @@ jobs:
         env:
           INPUT_SLACK_CHANNELS: ${{ github.event.inputs.channels }}
           INPUT_OUTPUTS: 'slack'
-          INPUT_SLACK_CHANNEL: ${{ github.event.inputs.channels }}
+          INPUT_NOTIFICATION_SLACK_CHANNEL: ${{ github.event.inputs.channels }}
           INPUT_SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           INPUT_SLACK_TEAM_ID: ${{ secrets.SLACK_TEAM_ID }}
           INPUT_ANTHROPIC_API_KEY: 'dummy'

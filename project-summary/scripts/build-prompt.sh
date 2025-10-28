@@ -146,7 +146,7 @@ for output in "${OUTPUTS_ARRAY[@]}"; do
     cat >> claude_prompt.md <<EOF
 ### Slack Output
 
-**Channel**: $INPUT_SLACK_CHANNEL
+**Channel**: $INPUT_NOTIFICATION_SLACK_CHANNEL
 
 **Action Required**: Post the summary to Slack using the MCP tool \`mcp__slack__slack_post_message\`
 
