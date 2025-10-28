@@ -178,6 +178,38 @@ runs:
       run: |
         bash ${{ github.action_path }}/scripts/load-template.sh
 
+    - name: Build MCP configuration
+      id: build-mcp
+      shell: bash
+      env:
+        INPUT_SLACK_CHANNELS: ${{ inputs.slack_channels }}
+        INPUT_SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
+        INPUT_SLACK_TEAM_ID: ${{ inputs.slack_team_id }}
+        INPUT_NOTION_TOKEN: ${{ inputs.notion_token }}
+        INPUT_OUTPUTS: ${{ inputs.outputs }}
+      run: |
+        bash ${{ github.action_path }}/scripts/build-mcp-config.sh
+
+    - name: Build Claude Code prompt
+      id: build-prompt
+      shell: bash
+      env:
+        TEMPLATE_FILE: ${{ steps.load-template.outputs.TEMPLATE_FILE }}
+        TEMPLATE_NAME: ${{ steps.load-template.outputs.TEMPLATE_NAME }}
+        LANGUAGE: ${{ steps.load-template.outputs.LANGUAGE }}
+        TONE: ${{ steps.load-template.outputs.TONE }}
+        GITHUB_DATA_FILE: ${{ steps.github-data.outputs.github-data-file }}
+        SLACK_DATA_FILE: ${{ steps.slack-data.outputs.slack-data-file }}
+        PERIOD_DESCRIPTION: ${{ steps.parse-period.outputs.PERIOD_DESCRIPTION }}
+        START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
+        END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
+        INPUT_CUSTOM_INSTRUCTIONS: ${{ inputs.custom_instructions }}
+        INPUT_OUTPUTS: ${{ inputs.outputs }}
+        INPUT_SLACK_CHANNEL: ${{ inputs.slack_channel }}
+        INPUT_NOTION_DATABASE_ID: ${{ inputs.notion_database_id }}
+      run: |
+        bash ${{ github.action_path }}/scripts/build-prompt.sh
+
     - name: Run Claude Code with MCP
       id: claude-code
       uses: anthropics/claude-code-action@f30f5eecfce2f34fa72e40fa5f7bcdbdcad12eb8 # v1.0.14
@@ -187,13 +219,10 @@ runs:
         claude_code_oauth_token: ${{ inputs.claude_code_oauth_token }}
         timeout_minutes: ${{ inputs.timeout_minutes }}
         claude_args: |
-          --system-prompt "You are an AI assistant generating project summaries. Analyze the provided data and create a comprehensive report."
+          --system-prompt "You are an AI assistant specialized in generating project summaries. You analyze GitHub and Slack data to create comprehensive, well-organized reports. Follow the template specifications closely and format outputs appropriately for each destination."
           --allowedTools "Bash,Grep,Glob,Read,Write,Edit,MultiEdit,LS,Task,TodoRead,TodoWrite,mcp__slack__slack_post_message,mcp__notion__create_page"
-          --mcp-config '{}'
-        prompt: |
-          Generate project summary for the specified period.
-
-          This is a placeholder prompt that will be enhanced in Phase 5.
+          --mcp-config '${{ steps.build-mcp.outputs.mcp-config }}'
+        prompt: ${{ steps.build-prompt.outputs.prompt }}
 
     - name: Send error notification to Slack
       if: failure() && inputs.slack_channel != '' && inputs.slack_bot_token != ''
