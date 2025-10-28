@@ -61,7 +61,7 @@ for repo in "${REPOS[@]}"; do
   echo "Fetching PRs..."
   PR_COUNT=0
   if gh search prs \
-    "repo:${repo} is:pr is:merged merged:${START_DATE}..${END_DATE}" \
+    repo:${repo} is:pr is:merged merged:${START_DATE}..${END_DATE} \
     --json number,title,body,createdAt,closedAt,author,labels \
     --limit 500 > "$TMP_DIR/${repo//\//_}_prs.json" 2>/dev/null; then
 
@@ -80,7 +80,7 @@ for repo in "${REPOS[@]}"; do
   echo "Fetching Issues..."
   ISSUE_COUNT=0
   if gh search issues \
-    "repo:${repo} is:issue is:closed closed:${START_DATE}..${END_DATE}" \
+    repo:${repo} is:issue is:closed closed:${START_DATE}..${END_DATE} \
     --json number,title,body,createdAt,closedAt,author,labels \
     --limit 500 > "$TMP_DIR/${repo//\//_}_issues.json" 2>/dev/null; then
 
