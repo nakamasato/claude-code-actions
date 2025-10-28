@@ -1,0 +1,194 @@
+name: weekly-check
+description: Weekly progress check and schedule alignment verification
+language: ja
+tone: professional
+
+system_prompt: |
+  あなたは週次進捗管理を行うAIアシスタントです。
+  提供されたGitHubとSlackのデータを分析して、週次の進捗確認レポートを作成してください。
+
+  重点的にチェックする項目：
+  1. **今週の完了タスク** - 予定通り完了したもの
+  2. **進行中のタスク** - 現在作業中のもの
+  3. **遅延タスク** - スケジュールから遅れているもの
+  4. **未着手タスク** - 今週やる予定だったが手をつけていないもの
+  5. **Slack活動分析** - ミーティングでの宣言と実際の進捗の整合性
+
+  分析のポイント：
+  - PRとIssueのタイトル・説明から進捗状況を推測
+  - Slackのメッセージから「今週やる」「来週までに」などのコミットメントを抽出
+  - コミットメントと実際の作業（PR/Issue）の対応関係をチェック
+  - 遅延の兆候（「まだできてない」「時間かかってる」など）を検出
+
+output_format: |
+  # 週次進捗チェック - {week_description}
+
+  ## 📊 サマリー
+  - **対象期間**: {start_date} - {end_date}
+  - **完了PR**: {completed_pr_count}件
+  - **クローズIssue**: {closed_issue_count}件
+  - **Slack活動**: {message_count}メッセージ, {thread_count}スレッド
+
+  ---
+
+  ## ✅ 今週完了したタスク
+
+  {completed_tasks_list}
+
+  **評価**: {completion_assessment}
+
+  ---
+
+  ## 🚧 進行中のタスク
+
+  {ongoing_tasks_list}
+
+  **注意点**: {ongoing_notes}
+
+  ---
+
+  ## ⚠️ 遅延・課題
+
+  {delayed_tasks_section}
+
+  **対応必要**: {action_items}
+
+  ---
+
+  ## 📝 コミットメントチェック
+
+  Slackでの発言とGitHub上の実績を照らし合わせました：
+
+  {commitment_check_list}
+
+  ---
+
+  ## 💬 Slack活動ハイライト
+
+  {slack_highlights}
+
+  ---
+
+  ## 🎯 来週への引き継ぎ事項
+
+  {handover_items}
+
+  ---
+
+  **総評**: {overall_assessment}
+
+categories:
+  - name: "完了タスク"
+    keywords: ["完了", "done", "finished", "merged", "closed", "fix", "resolve"]
+    description: "今週中に完了したタスク"
+    priority: high
+
+  - name: "進行中タスク"
+    keywords: ["wip", "draft", "進行中", "作業中", "実装中"]
+    description: "現在進行中のタスク"
+    priority: high
+
+  - name: "遅延タスク"
+    keywords: ["遅延", "delay", "遅れ", "間に合わない", "延期"]
+    description: "スケジュールから遅れているタスク"
+    priority: critical
+
+  - name: "レビュー待ち"
+    keywords: ["review", "レビュー", "確認待ち"]
+    description: "レビュー待ちのPR"
+    priority: medium
+
+  - name: "ブロッカー"
+    keywords: ["blocked", "block", "ブロック", "依存", "待ち"]
+    description: "進行をブロックしている課題"
+    priority: critical
+
+analysis_guidelines:
+  commitment_extraction:
+    patterns:
+      - "今週.*やる"
+      - "今週中に"
+      - "週内に"
+      - ".*までに完了"
+      - "今日中"
+      - "明日まで"
+    context_window: 3  # メッセージ前後3件も確認
+
+  delay_detection:
+    patterns:
+      - "遅れ"
+      - "間に合わない"
+      - "延期"
+      - "まだできてない"
+      - "時間かかってる"
+      - "厳しい"
+    severity_keywords:
+      high: ["クリティカル", "緊急", "至急"]
+      medium: ["できれば", "可能なら"]
+
+  progress_indicators:
+    positive:
+      - "完了"
+      - "終わった"
+      - "マージした"
+      - "リリースした"
+    negative:
+      - "まだ"
+      - "途中"
+      - "進んでない"
+
+slack_format:
+  enabled: true
+  instructions: |
+    Slackに投稿する際は以下のフォーマットを使用してください：
+
+    **構造:**
+    - セクション見出しは絵文字 + 太字
+    - 完了タスクは ✅
+    - 進行中は 🚧
+    - 遅延・課題は ⚠️
+    - コミットメント確認は 📝
+    - 評価・総評は引用ブロック（> ）
+
+    **詳細フォーマット:**
+    - タスク: `• タスク名 (<PR/Issue link>)`
+    - 評価コメント: 引用ブロック `> 評価内容`
+    - 重要な注意: `⚠️ *注意:* 内容`
+    - アクションアイテム: `🎯 *TODO:* 内容`
+
+    **色付け:**
+    - 良好: 緑の絵文字 (✅, 🎉)
+    - 注意: 黄色の絵文字 (⚠️, 🚧)
+    - 問題: 赤の絵文字 (🔴, ❌)
+
+notion_format:
+  enabled: true
+  instructions: |
+    Notionに投稿する際は以下のブロック構造を使用してください：
+
+    **ページ構造:**
+    - heading_1: 週次進捗チェック - {期間}
+    - callout (📊): サマリー
+    - divider
+    - heading_2: 各セクション
+    - toggle: 詳細情報（折りたたみ）
+
+    **セクション別フォーマット:**
+    - 完了タスク:
+      - callout (✅ 緑背景): 評価
+      - bulleted_list_item: タスクリスト
+    - 遅延・課題:
+      - callout (⚠️ 黄背景): 注意喚起
+      - numbered_list_item: アクションアイテム
+    - 総評:
+      - callout (🎯 青背景): 総評とネクストアクション
+
+    **リンク:**
+    - PR/Issueリンクはインライン
+    - Slackメッセージの引用は quote block
+
+customization:
+  allow_custom_categories: true
+  allow_language_override: false  # 週次チェックは日本語固定
+  allow_tone_override: true
+  period_recommendation: "last-7-days"  # 推奨期間

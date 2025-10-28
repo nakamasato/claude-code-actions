@@ -33,7 +33,7 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `template` | No | `monthly-report` | Template: `monthly-report`, `sprint-summary`, `release-notes` |
+| `template` | No | `monthly-report` | Template: `monthly-report`, `sprint-summary`, `release-notes`, `weekly-check` |
 | `custom_instructions` | No | - | Additional instructions for the AI |
 | `language` | No | - | Output language (`en`, `ja`, etc.) |
 | `tone` | No | - | Tone: `formal`, `casual`, `technical` |
@@ -106,6 +106,23 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
 
+### Weekly Progress Check
+
+```yaml
+- name: Weekly progress check
+  uses: nakamasato/claude-code-actions/project-summary@v1
+  with:
+    github_repositories: myorg/project
+    slack_channels: C1234567890  # team channel with meeting notes
+    period: last-7-days
+    template: weekly-check
+    outputs: slack
+    notification_slack_channel: C1234567890
+    slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+    slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
+    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+```
+
 ### Cross-Organization with GitHub App
 
 ```yaml
@@ -162,16 +179,30 @@ jobs:
 - **Language**: Japanese
 - **Tone**: Casual
 - **Use Case**: Regular team updates, monthly progress reports
+- **Period**: last-month
 
 ### sprint-summary
 - **Language**: English
 - **Tone**: Professional
 - **Use Case**: Sprint retrospectives, two-week summaries
+- **Period**: last-14-days
 
 ### release-notes
 - **Language**: English
 - **Tone**: Formal
 - **Use Case**: Customer-facing release notes, changelogs
+- **Period**: Custom date range
+
+### weekly-check
+- **Language**: Japanese
+- **Tone**: Professional
+- **Use Case**: Weekly progress check, schedule alignment verification
+- **Period**: last-7-days
+- **Features**:
+  - Task completion tracking
+  - Delay detection
+  - Commitment vs. actual progress comparison
+  - Slack meeting notes analysis
 
 ## Setup Requirements
 
