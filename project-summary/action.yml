@@ -1,0 +1,249 @@
+name: 'Project Summary'
+description: 'Generate AI-powered project summaries from GitHub and Slack, post to Slack and Notion'
+author: 'nakamasato'
+
+inputs:
+  # Data Sources
+  github_repositories:
+    description: 'Comma-separated list of repositories (owner/repo format). Example: org/repo1,org/repo2'
+    required: false
+
+  slack_channels:
+    description: 'Comma-separated list of Slack channel IDs. Example: C1234567890,C0987654321'
+    required: false
+
+  # Time Period
+  period:
+    description: 'Time period (last-7-days, last-month, last-quarter, YYYY-MM, YYYY-MM-DD..YYYY-MM-DD)'
+    required: false
+    default: 'last-month'
+
+  start_date:
+    description: 'Start date (YYYY-MM-DD) - alternative to period'
+    required: false
+
+  end_date:
+    description: 'End date (YYYY-MM-DD) - alternative to period'
+    required: false
+
+  # Prompt Configuration
+  template:
+    description: 'Template name (monthly-report, sprint-summary, release-notes, weekly-check)'
+    required: false
+    default: 'monthly-report'
+
+  system_prompt:
+    description: 'Custom system prompt (overrides template system_prompt if specified)'
+    required: false
+
+  output_format:
+    description: 'Custom output format (overrides template output_format if specified)'
+    required: false
+
+  language:
+    description: 'Output language (en, ja, es, fr, etc.)'
+    required: false
+
+  tone:
+    description: 'Output tone (formal, casual, technical)'
+    required: false
+
+  # Output Configuration
+  outputs:
+    description: 'Comma-separated list of outputs (slack, notion). Example: slack,notion'
+    required: true
+
+  # Slack Output Config
+  notification_slack_channel:
+    description: 'Slack channel ID for posting results'
+    required: false
+
+  slack_bot_token:
+    description: 'Slack Bot Token'
+    required: false
+
+  slack_team_id:
+    description: 'Slack Team ID'
+    required: false
+
+  # Notion Output Config
+  notion_database_id:
+    description: 'Notion database ID for creating new page'
+    required: false
+
+  notion_token:
+    description: 'Notion Integration Token'
+    required: false
+
+  # Authentication
+  github_token:
+    description: 'GitHub Token (supports GitHub App tokens for cross-org access)'
+    required: false
+    default: ${{ github.token }}
+
+  claude_code_oauth_token:
+    description: 'Claude Code OAuth Token'
+    required: false
+
+  anthropic_api_key:
+    description: 'Anthropic API Key'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate inputs
+      id: validate
+      shell: bash
+      env:
+        INPUT_GITHUB_REPOSITORIES: ${{ inputs.github_repositories }}
+        INPUT_SLACK_CHANNELS: ${{ inputs.slack_channels }}
+        INPUT_PERIOD: ${{ inputs.period }}
+        INPUT_START_DATE: ${{ inputs.start_date }}
+        INPUT_END_DATE: ${{ inputs.end_date }}
+        INPUT_TEMPLATE: ${{ inputs.template }}
+        INPUT_SYSTEM_PROMPT: ${{ inputs.system_prompt }}
+        INPUT_OUTPUT_FORMAT: ${{ inputs.output_format }}
+        INPUT_LANGUAGE: ${{ inputs.language }}
+        INPUT_TONE: ${{ inputs.tone }}
+        INPUT_OUTPUTS: ${{ inputs.outputs }}
+        INPUT_NOTIFICATION_SLACK_CHANNEL: ${{ inputs.notification_slack_channel }}
+        INPUT_SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
+        INPUT_SLACK_TEAM_ID: ${{ inputs.slack_team_id }}
+        INPUT_NOTION_DATABASE_ID: ${{ inputs.notion_database_id }}
+        INPUT_NOTION_TOKEN: ${{ inputs.notion_token }}
+        INPUT_ANTHROPIC_API_KEY: ${{ inputs.anthropic_api_key }}
+        INPUT_CLAUDE_CODE_OAUTH_TOKEN: ${{ inputs.claude_code_oauth_token }}
+      run: |
+        bash ${{ github.action_path }}/scripts/validate-inputs.sh
+
+    - name: Parse time period
+      id: parse-period
+      shell: bash
+      env:
+        INPUT_PERIOD: ${{ inputs.period }}
+        INPUT_START_DATE: ${{ inputs.start_date }}
+        INPUT_END_DATE: ${{ inputs.end_date }}
+      run: |
+        bash ${{ github.action_path }}/scripts/parse-period.sh
+
+    - name: Collect GitHub data
+      id: github-data
+      if: inputs.github_repositories != ''
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        INPUT_GITHUB_REPOSITORIES: ${{ inputs.github_repositories }}
+        START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
+        END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
+      run: |
+        bash ${{ github.action_path }}/scripts/collect-github-data.sh
+
+    - name: Setup Node.js for Slack data collection
+      if: inputs.slack_channels != ''
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Slack data collection dependencies
+      if: inputs.slack_channels != ''
+      shell: bash
+      run: |
+        cd ${{ github.action_path }}/scripts
+        npm install
+
+    - name: Collect Slack data
+      id: slack-data
+      if: inputs.slack_channels != ''
+      shell: bash
+      env:
+        INPUT_SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
+        INPUT_SLACK_CHANNELS: ${{ inputs.slack_channels }}
+        START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
+        END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
+      run: |
+        node ${{ github.action_path }}/scripts/collect-slack-data.js
+
+    - name: Load template
+      id: load-template
+      shell: bash
+      env:
+        INPUT_TEMPLATE: ${{ inputs.template }}
+        INPUT_SYSTEM_PROMPT: ${{ inputs.system_prompt }}
+        INPUT_OUTPUT_FORMAT: ${{ inputs.output_format }}
+        INPUT_LANGUAGE: ${{ inputs.language }}
+        INPUT_TONE: ${{ inputs.tone }}
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+      run: |
+        bash ${{ github.action_path }}/scripts/load-template.sh
+
+    - name: Build MCP configuration
+      id: build-mcp
+      shell: bash
+      env:
+        INPUT_SLACK_CHANNELS: ${{ inputs.slack_channels }}
+        INPUT_SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
+        INPUT_SLACK_TEAM_ID: ${{ inputs.slack_team_id }}
+        INPUT_NOTION_TOKEN: ${{ inputs.notion_token }}
+        INPUT_OUTPUTS: ${{ inputs.outputs }}
+      run: |
+        bash ${{ github.action_path }}/scripts/build-mcp-config.sh
+
+    - name: Build Claude Code prompt
+      id: build-prompt
+      shell: bash
+      env:
+        TEMPLATE_FILE: ${{ steps.load-template.outputs.TEMPLATE_FILE }}
+        TEMPLATE_NAME: ${{ steps.load-template.outputs.TEMPLATE_NAME }}
+        LANGUAGE: ${{ steps.load-template.outputs.LANGUAGE }}
+        TONE: ${{ steps.load-template.outputs.TONE }}
+        SYSTEM_PROMPT: ${{ steps.load-template.outputs.SYSTEM_PROMPT }}
+        OUTPUT_FORMAT: ${{ steps.load-template.outputs.OUTPUT_FORMAT }}
+        GITHUB_DATA_FILE: ${{ steps.github-data.outputs.github-data-file }}
+        SLACK_DATA_FILE: ${{ steps.slack-data.outputs.slack-data-file }}
+        PERIOD_DESCRIPTION: ${{ steps.parse-period.outputs.PERIOD_DESCRIPTION }}
+        START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
+        END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
+        INPUT_OUTPUTS: ${{ inputs.outputs }}
+        INPUT_NOTIFICATION_SLACK_CHANNEL: ${{ inputs.notification_slack_channel }}
+        INPUT_NOTION_DATABASE_ID: ${{ inputs.notion_database_id }}
+      run: |
+        bash ${{ github.action_path }}/scripts/build-prompt.sh
+
+    - name: Verify git repository context
+      shell: bash
+      run: |
+        echo "Current directory: $(pwd)"
+        echo "Git status check:"
+        git rev-parse --git-dir || echo "Warning: Not in a git repository"
+        ls -la
+
+    - name: Run Claude Code with MCP
+      id: claude-code
+      uses: anthropics/claude-code-action@f30f5eecfce2f34fa72e40fa5f7bcdbdcad12eb8 # v1.0.14
+      with:
+        github_token: ${{ inputs.github_token }}
+        anthropic_api_key: ${{ inputs.anthropic_api_key }}
+        claude_code_oauth_token: ${{ inputs.claude_code_oauth_token }}
+        claude_args: |
+          --system-prompt "You are an AI assistant specialized in generating project summaries. You analyze GitHub and Slack data to create comprehensive, well-organized reports. Follow the template specifications closely and format outputs appropriately for each destination."
+          --allowedTools "Bash,Grep,Glob,Read,Write,Edit,MultiEdit,LS,Task,TodoRead,TodoWrite,mcp__slack__slack_post_message,mcp__notion__create_page"
+          --mcp-config '${{ steps.build-mcp.outputs.mcp-config }}'
+        prompt: ${{ steps.build-prompt.outputs.prompt }}
+
+    - name: Send error notification to Slack
+      if: failure() && inputs.notification_slack_channel != '' && inputs.slack_bot_token != ''
+      shell: bash
+      run: |
+        curl -X POST -H 'Content-type: application/json' \
+          -H "Authorization: Bearer ${{ inputs.slack_bot_token }}" \
+          -d '{
+            "channel": "${{ inputs.notification_slack_channel }}",
+            "text": "⚠️ *Project Summary generation failed*\n\nRepository: ${{ github.repository }}\nWorkflow: ${{ github.workflow }}\n\nSee details: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>",
+            "mrkdwn": true
+          }' \
+          https://slack.com/api/chat.postMessage
+
+branding:
+  icon: 'file-text'
+  color: 'blue'

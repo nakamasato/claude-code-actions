@@ -1,0 +1,44 @@
+name: Test Project Summary - End to End
+
+on:
+  workflow_dispatch:
+    inputs:
+      github_repositories:
+        description: 'Repositories (comma-separated)'
+        required: false
+        default: 'nakamasato/claude-code-actions'
+      period:
+        description: 'Time period'
+        required: false
+        default: 'last-month'
+      template:
+        description: 'Template to use'
+        required: false
+        default: 'monthly-report'
+
+jobs:
+  test-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify git repository
+        run: |
+          pwd
+          git status
+          git log -1 --oneline
+
+      - name: Run Project Summary Action
+        uses: ./project-summary
+        with:
+          github_repositories: ${{ github.event.inputs.github_repositories }}
+          period: ${{ github.event.inputs.period }}
+          template: ${{ github.event.inputs.template }}
+          outputs: slack
+          notification_slack_channel: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

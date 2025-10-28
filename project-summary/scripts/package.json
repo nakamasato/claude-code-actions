@@ -1,0 +1,10 @@
+{
+  "name": "project-summary-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for project-summary action",
+  "type": "module",
+  "scripts": {},
+  "dependencies": {
+    "@slack/web-api": "^7.0.0"
+  }
+}
