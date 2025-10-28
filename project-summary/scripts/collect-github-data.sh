@@ -62,7 +62,7 @@ for repo in "${REPOS[@]}"; do
   PR_COUNT=0
   if gh search prs \
     "repo:${repo} is:pr is:merged merged:${START_DATE}..${END_DATE}" \
-    --json number,title,body,createdAt,mergedAt,author,labels \
+    --json number,title,body,createdAt,closedAt,author,labels \
     --limit 500 > "$TMP_DIR/${repo//\//_}_prs.json" 2>/dev/null; then
 
     PR_COUNT=$(jq 'length' "$TMP_DIR/${repo//\//_}_prs.json")
@@ -107,7 +107,7 @@ for repo in "${REPOS[@]}"; do
         title: .title,
         body: .body,
         created_at: .createdAt,
-        merged_at: .mergedAt,
+        merged_at: .closedAt,
         author: .author.login,
         labels: [.labels[].name]
       })),
