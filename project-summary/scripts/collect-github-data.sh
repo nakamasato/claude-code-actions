@@ -63,7 +63,7 @@ for repo in "${REPOS[@]}"; do
   if gh search prs \
     --repo "$repo" \
     --merged \
-    --merged-at "${START_DATE}..${END_DATE}" \
+    --merged ">=${START_DATE} <=${END_DATE}" \
     --json number,title,body,createdAt,mergedAt,author,labels \
     --limit 500 > "$TMP_DIR/${repo//\//_}_prs.json" 2>/dev/null; then
 
@@ -84,7 +84,7 @@ for repo in "${REPOS[@]}"; do
   if gh search issues \
     --repo "$repo" \
     --closed \
-    --closed-at "${START_DATE}..${END_DATE}" \
+    --closed ">=${START_DATE} <=${END_DATE}" \
     --json number,title,body,createdAt,closedAt,author,labels \
     --limit 500 > "$TMP_DIR/${repo//\//_}_issues.json" 2>/dev/null; then
 
