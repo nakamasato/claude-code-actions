@@ -1,0 +1,70 @@
+name: Test Project Summary - GitHub Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      repositories:
+        description: 'Repositories to test (comma-separated)'
+        required: true
+        default: 'nakamasato/claude-code-actions'
+      period:
+        description: 'Time period'
+        required: false
+        default: 'last-month'
+
+jobs:
+  test-github-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test input validation and period parsing
+        shell: bash
+        env:
+          INPUT_REPOSITORIES: ${{ github.event.inputs.repositories }}
+          INPUT_OUTPUTS: 'slack'
+          INPUT_SLACK_CHANNEL: 'C1234567890'
+          INPUT_SLACK_BOT_TOKEN: 'dummy'
+          INPUT_SLACK_TEAM_ID: 'dummy'
+          INPUT_ANTHROPIC_API_KEY: 'dummy'
+          INPUT_PERIOD: ${{ github.event.inputs.period }}
+          INPUT_TEMPLATE: 'monthly-report'
+          INPUT_TIMEOUT_MINUTES: '10'
+        run: |
+          bash project-summary/scripts/validate-inputs.sh
+
+      - name: Test period parsing
+        id: parse-period
+        shell: bash
+        env:
+          INPUT_PERIOD: ${{ github.event.inputs.period }}
+        run: |
+          bash project-summary/scripts/parse-period.sh
+
+      - name: Test GitHub data collection
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_REPOSITORIES: ${{ github.event.inputs.repositories }}
+          START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
+          END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
+        run: |
+          bash project-summary/scripts/collect-github-data.sh
+
+      - name: Display collected data
+        shell: bash
+        run: |
+          echo "=== GitHub Data Summary ==="
+          if [ -f github_data.json ]; then
+            jq '.' github_data.json
+          else
+            echo "No github_data.json file found"
+          fi
+
+      - name: Upload data artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: github-data-test
+          path: github_data.json
