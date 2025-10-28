@@ -1,0 +1,126 @@
+name: sprint-summary
+description: Sprint retrospective for two-week development cycles
+language: en
+tone: professional
+
+system_prompt: |
+  You are an AI assistant generating sprint retrospectives for software development teams.
+  Analyze the provided GitHub and Slack data to create a comprehensive sprint summary.
+
+  Focus on:
+  - Completed work and deliverables
+  - Sprint velocity and metrics
+  - Blockers and challenges encountered
+  - Technical debt addressed
+  - Team collaboration insights from Slack
+
+  Keep the tone professional but encouraging.
+
+output_format: |
+  # Sprint Summary - {period_description}
+
+  ## Overview
+  Repositories: {repository_names}
+  PRs Merged: {pr_count} | Issues Closed: {issue_count}
+
+  ## Completed Work
+
+  ### {category_1}
+  - {item_1} ({pr_links})
+  - {item_2} ({pr_links})
+
+  ### {category_2}
+  - {item_1} ({issue_links})
+
+  ## Sprint Metrics
+  - Total commits: {commit_count}
+  - Code reviews completed: {review_count}
+  - Average PR size: {avg_pr_size} lines
+
+  ## Team Collaboration
+  Slack activity in {channel_names}: {message_count} messages
+  - Key discussions: {topic_1}, {topic_2}
+  - Decisions made: {decision_count}
+
+  ## Blockers & Challenges
+  {blockers_section}
+
+  ## Technical Debt
+  {tech_debt_section}
+
+  ## Next Sprint Focus
+  {next_sprint_recommendations}
+
+categories:
+  - name: "Features"
+    keywords: ["feature", "add", "implement", "new"]
+    description: "New features and enhancements"
+
+  - name: "Bug Fixes"
+    keywords: ["bug", "fix", "hotfix", "issue"]
+    description: "Bug fixes and issue resolutions"
+
+  - name: "Refactoring"
+    keywords: ["refactor", "refactoring", "cleanup", "improve"]
+    description: "Code refactoring and improvements"
+
+  - name: "Testing"
+    keywords: ["test", "testing", "coverage", "e2e", "unit"]
+    description: "Test additions and improvements"
+
+  - name: "Infrastructure"
+    keywords: ["infra", "ci", "cd", "deploy", "docker", "k8s"]
+    description: "Infrastructure and DevOps work"
+
+  - name: "Documentation"
+    keywords: ["doc", "docs", "documentation", "readme"]
+    description: "Documentation updates"
+
+slack_format:
+  enabled: true
+  instructions: |
+    Use Slack mrkdwn format:
+
+    **Headings:**
+    - *Main sections* in bold
+    - Use --- for separators
+
+    **Links:**
+    - <URL|text> format
+    - PR links: <https://github.com/{owner}/{repo}/pull/{number}|#{number}>
+
+    **Lists:**
+    - Use • or - for bullet points
+    - Use 1., 2., 3. for numbered lists
+
+    **Emphasis:**
+    - *bold* for important items
+    - `code` for technical terms
+    - _italic_ for notes
+
+notion_format:
+  enabled: true
+  instructions: |
+    Use Notion blocks:
+
+    **Structure:**
+    - heading_1: Sprint Summary title
+    - heading_2: Main sections (Overview, Completed Work, etc.)
+    - heading_3: Subsections
+    - callout: Important metrics or highlights
+    - bulleted_list_item: List items
+    - toggle: Expandable sections for details
+
+    **Emojis:**
+    - 🎯 Overview
+    - ✅ Completed Work
+    - 📊 Sprint Metrics
+    - 💬 Team Collaboration
+    - ⚠️ Blockers & Challenges
+    - 🔧 Technical Debt
+    - 🚀 Next Sprint Focus
+
+customization:
+  allow_custom_categories: true
+  allow_language_override: true
+  allow_tone_override: true

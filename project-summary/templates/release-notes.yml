@@ -1,0 +1,139 @@
+name: release-notes
+description: Customer-facing release notes and changelogs
+language: en
+tone: formal
+
+system_prompt: |
+  You are an AI assistant generating customer-facing release notes.
+  Analyze the provided GitHub data to create clear, professional release notes.
+
+  Guidelines:
+  - Focus on user-visible changes and benefits
+  - Use clear, non-technical language when possible
+  - Group changes by type (New Features, Improvements, Bug Fixes, Breaking Changes)
+  - Include relevant PR references for technical readers
+  - Highlight breaking changes prominently
+  - Maintain a professional, formal tone
+
+  Do not include:
+  - Internal refactoring (unless it improves performance/reliability)
+  - Minor code cleanups
+  - Development/testing infrastructure changes
+  - Internal tool updates
+
+output_format: |
+  # Release Notes - {version} ({period_description})
+
+  We're excited to announce the release of version {version}! This release includes {pr_count} changes across {repository_names}.
+
+  ## 🎉 New Features
+
+  {new_features_list}
+
+  ## ⬆️ Improvements
+
+  {improvements_list}
+
+  ## 🐛 Bug Fixes
+
+  {bug_fixes_list}
+
+  ## ⚠️ Breaking Changes
+
+  {breaking_changes_list}
+
+  ## 📚 Documentation
+
+  {documentation_list}
+
+  ## 🔗 Full Changelog
+
+  For a complete list of changes, see:
+  {changelog_links}
+
+  ---
+
+  Thank you to all contributors who made this release possible!
+
+categories:
+  - name: "New Features"
+    keywords: ["feature", "add", "new", "introduce"]
+    description: "Brand new functionality"
+    emoji: "🎉"
+
+  - name: "Improvements"
+    keywords: ["improve", "enhance", "optimize", "better", "performance"]
+    description: "Enhancements to existing features"
+    emoji: "⬆️"
+
+  - name: "Bug Fixes"
+    keywords: ["bug", "fix", "resolve", "issue"]
+    description: "Bug fixes and issue resolutions"
+    emoji: "🐛"
+
+  - name: "Breaking Changes"
+    keywords: ["breaking", "breaking change", "deprecated", "remove"]
+    description: "Changes that may require user action"
+    emoji: "⚠️"
+    important: true
+
+  - name: "Documentation"
+    keywords: ["doc", "docs", "documentation", "guide"]
+    description: "Documentation updates"
+    emoji: "📚"
+
+  - name: "Security"
+    keywords: ["security", "vulnerability", "cve"]
+    description: "Security fixes and improvements"
+    emoji: "🔒"
+    important: true
+
+slack_format:
+  enabled: true
+  instructions: |
+    Use Slack mrkdwn format:
+
+    **Structure:**
+    - *Release Notes - {version}* as main heading
+    - Section headings with emojis
+    - Bullet points for each change
+
+    **Format:**
+    - *bold* for important items
+    - `code` for technical terms
+    - PR links: <https://github.com/{owner}/{repo}/pull/{number}|#{number}>
+
+    **Emphasis:**
+    - Use ⚠️ for breaking changes
+    - Use 🔒 for security fixes
+    - Keep language professional and clear
+
+notion_format:
+  enabled: true
+  instructions: |
+    Use Notion blocks:
+
+    **Structure:**
+    - heading_1: Release Notes title with version
+    - callout: Release summary (with 📦 emoji)
+    - heading_2: Category sections
+    - bulleted_list_item: Individual changes
+    - callout: Breaking changes (with ⚠️ emoji, red background)
+    - callout: Security fixes (with 🔒 emoji, orange background)
+
+    **Formatting:**
+    - Use toggle blocks for detailed technical explanations
+    - Link to PRs inline within descriptions
+    - Use code blocks for code examples
+    - Add divider between major sections
+
+    **Important sections:**
+    - Highlight breaking changes prominently
+    - Add migration guides for breaking changes
+    - Include upgrade instructions if needed
+
+customization:
+  allow_custom_categories: true
+  allow_language_override: true
+  allow_tone_override: false
+  version_required: true

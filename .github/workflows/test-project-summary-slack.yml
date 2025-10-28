@@ -1,0 +1,81 @@
+name: Test Project Summary - Slack Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      channels:
+        description: 'Slack channels to test (comma-separated)'
+        required: true
+        default: ''
+      period:
+        description: 'Time period'
+        required: false
+        default: 'last-7-days'
+
+jobs:
+  test-slack-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Test input validation
+        shell: bash
+        env:
+          INPUT_SLACK_CHANNELS: ${{ github.event.inputs.channels }}
+          INPUT_OUTPUTS: 'slack'
+          INPUT_SLACK_CHANNEL: ${{ github.event.inputs.channels }}
+          INPUT_SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          INPUT_SLACK_TEAM_ID: ${{ secrets.SLACK_TEAM_ID }}
+          INPUT_ANTHROPIC_API_KEY: 'dummy'
+          INPUT_PERIOD: ${{ github.event.inputs.period }}
+          INPUT_TEMPLATE: 'monthly-report'
+          INPUT_TIMEOUT_MINUTES: '10'
+        run: |
+          bash project-summary/scripts/validate-inputs.sh
+
+      - name: Test period parsing
+        id: parse-period
+        shell: bash
+        env:
+          INPUT_PERIOD: ${{ github.event.inputs.period }}
+        run: |
+          bash project-summary/scripts/parse-period.sh
+
+      - name: Install Slack data collection dependencies
+        shell: bash
+        run: |
+          cd project-summary/scripts
+          npm install
+
+      - name: Test Slack data collection
+        shell: bash
+        env:
+          INPUT_SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          INPUT_SLACK_CHANNELS: ${{ github.event.inputs.channels }}
+          START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
+          END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
+        run: |
+          node project-summary/scripts/collect-slack-data.js
+
+      - name: Display collected data
+        shell: bash
+        run: |
+          echo "=== Slack Data Summary ==="
+          if [ -f slack_data.json ]; then
+            jq '.' slack_data.json
+          else
+            echo "No slack_data.json file found"
+          fi
+
+      - name: Upload data artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: slack-data-test
+          path: slack_data.json

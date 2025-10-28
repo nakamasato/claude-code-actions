@@ -141,19 +141,42 @@ runs:
       run: |
         bash ${{ github.action_path }}/scripts/collect-github-data.sh
 
+    - name: Setup Node.js for Slack data collection
+      if: inputs.slack_channels != ''
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Slack data collection dependencies
+      if: inputs.slack_channels != ''
+      shell: bash
+      run: |
+        cd ${{ github.action_path }}/scripts
+        npm install
+
     - name: Collect Slack data
       id: slack-data
       if: inputs.slack_channels != ''
       shell: bash
+      env:
+        INPUT_SLACK_BOT_TOKEN: ${{ inputs.slack_bot_token }}
+        INPUT_SLACK_CHANNELS: ${{ inputs.slack_channels }}
+        START_DATE: ${{ steps.parse-period.outputs.START_DATE }}
+        END_DATE: ${{ steps.parse-period.outputs.END_DATE }}
       run: |
-        bash ${{ github.action_path }}/scripts/collect-slack-data.sh
+        node ${{ github.action_path }}/scripts/collect-slack-data.js
 
     - name: Load template
       id: load-template
       shell: bash
+      env:
+        INPUT_TEMPLATE: ${{ inputs.template }}
+        INPUT_LANGUAGE: ${{ inputs.language }}
+        INPUT_TONE: ${{ inputs.tone }}
+        INPUT_CUSTOM_INSTRUCTIONS: ${{ inputs.custom_instructions }}
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
       run: |
-        # Template loading logic will be implemented in Phase 4
-        echo "template-loaded=true" >> "$GITHUB_OUTPUT"
+        bash ${{ github.action_path }}/scripts/load-template.sh
 
     - name: Run Claude Code with MCP
       id: claude-code
