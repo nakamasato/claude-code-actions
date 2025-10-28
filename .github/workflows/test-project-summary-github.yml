@@ -20,6 +20,7 @@ jobs:
           INPUT_NOTIFICATION_SLACK_CHANNEL: 'C123456789'
           INPUT_SLACK_BOT_TOKEN: 'dummy'
           INPUT_SLACK_TEAM_ID: 'dummy'
+          INPUT_ANTHROPIC_API_KEY: 'dummy'
           INPUT_PERIOD: 'last-7-days'
           INPUT_TEMPLATE: 'weekly-check'
         run: |
