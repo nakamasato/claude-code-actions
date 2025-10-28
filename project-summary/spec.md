@@ -100,7 +100,7 @@ Each template includes:
 ```yaml
 inputs:
   # Data Sources
-  repositories:
+  github_repositories:
     description: 'Comma-separated list of repositories (owner/repo format)'
     required: false
     example: 'org/repo1,org/repo2,otherorg/repo3'
@@ -149,7 +149,7 @@ inputs:
     example: 'slack,notion'
 
   # Slack Output Config
-  slack_channel:
+  notification_slack_channel:
     description: 'Slack channel ID for posting results'
     required: false # required if outputs contains 'slack'
 
@@ -418,10 +418,10 @@ notion_format:
 - name: Generate monthly summary
   uses: nakamasato/claude-code-actions/project-summary@v1
   with:
-    repositories: myorg/backend,myorg/frontend
+    github_repositories: myorg/backend,myorg/frontend
     slack_channels: C1234567890
     outputs: slack
-    slack_channel: C1234567890
+    notification_slack_channel: C1234567890
     slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
     slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -433,7 +433,7 @@ notion_format:
 - name: Generate sprint summary
   uses: nakamasato/claude-code-actions/project-summary@v1
   with:
-    repositories: myorg/api
+    github_repositories: myorg/api
     slack_channels: C1234567890,C0987654321
     period: last-14-days
     template: sprint-summary
@@ -443,7 +443,7 @@ notion_format:
       - Blocked items
       - Technical debt addressed
     outputs: slack,notion
-    slack_channel: C1234567890
+    notification_slack_channel: C1234567890
     notion_database_id: ${{ secrets.NOTION_DB_ID }}
     slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
     slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
@@ -457,7 +457,7 @@ notion_format:
 - name: Generate release notes
   uses: nakamasato/claude-code-actions/project-summary@v1
   with:
-    repositories: myorg/backend,myorg/frontend,myorg/mobile
+    github_repositories: myorg/backend,myorg/frontend,myorg/mobile
     start_date: 2024-01-01
     end_date: 2024-01-31
     template: release-notes
