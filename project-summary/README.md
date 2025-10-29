@@ -17,7 +17,7 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 The action follows a four-phase pipeline: data collection, prompt generation, LLM processing, and output delivery.
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#fff', 'primaryTextColor':'#000', 'primaryBorderColor':'#000', 'lineColor':'#000', 'secondaryColor':'#f0f0f0', 'tertiaryColor':'#fff', 'background':'#ffffff', 'mainBkg':'#ffffff', 'secondBkg':'#f0f0f0', 'tertiaryBorderColor':'#000', 'tertiaryTextColor':'#000'}}}%%
+%%{init: {'theme':'default', 'themeVariables': { 'darkMode':'false', 'primaryColor':'#fff', 'primaryTextColor':'#000', 'primaryBorderColor':'#000', 'lineColor':'#000', 'secondaryColor':'#f0f0f0', 'tertiaryColor':'#fff', 'background':'#ffffff', 'mainBkg':'#ffffff', 'secondBkg':'#f0f0f0', 'tertiaryBorderColor':'#000', 'tertiaryTextColor':'#000', 'clusterBkg':'#fff', 'clusterBorder':'#000', 'titleColor':'#000', 'edgeLabelBackground':'#ffffff'}}}%%
 flowchart TB
     subgraph Input ["📥 Input Phase"]
         A1[GitHub Repositories]
@@ -75,11 +75,31 @@ flowchart TB
     D4 --> E2
     E2 --> E3
 
-    style Input fill:#e1f5ff
-    style DataCollection fill:#fff3e0
-    style PromptGen fill:#f3e5f5
-    style LLM fill:#e8f5e9
-    style Output fill:#fce4ec
+    style Input fill:#e1f5ff,stroke:#000,color:#000
+    style DataCollection fill:#fff3e0,stroke:#000,color:#000
+    style PromptGen fill:#f3e5f5,stroke:#000,color:#000
+    style LLM fill:#e8f5e9,stroke:#000,color:#000
+    style Output fill:#fce4ec,stroke:#000,color:#000
+
+    style A1 fill:#fff,stroke:#000,color:#000
+    style A2 fill:#fff,stroke:#000,color:#000
+    style A3 fill:#fff,stroke:#000,color:#000
+    style A4 fill:#fff,stroke:#000,color:#000
+    style B1 fill:#fff,stroke:#000,color:#000
+    style B2 fill:#fff,stroke:#000,color:#000
+    style B3 fill:#fff,stroke:#000,color:#000
+    style B4 fill:#fff,stroke:#000,color:#000
+    style C1 fill:#fff,stroke:#000,color:#000
+    style C2 fill:#fff,stroke:#000,color:#000
+    style C3 fill:#fff,stroke:#000,color:#000
+    style C4 fill:#fff,stroke:#000,color:#000
+    style D1 fill:#fff,stroke:#000,color:#000
+    style D2 fill:#fff,stroke:#000,color:#000
+    style D3 fill:#fff,stroke:#000,color:#000
+    style D4 fill:#fff,stroke:#000,color:#000
+    style E1 fill:#fff,stroke:#000,color:#000
+    style E2 fill:#fff,stroke:#000,color:#000
+    style E3 fill:#fff,stroke:#000,color:#000
 ```
 
 ### Key Components
@@ -92,7 +112,7 @@ flowchart TB
 ### Data Flow
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#fff', 'primaryTextColor':'#000', 'primaryBorderColor':'#000', 'lineColor':'#000', 'secondaryColor':'#f0f0f0', 'tertiaryColor':'#fff', 'background':'#ffffff', 'mainBkg':'#ffffff', 'secondBkg':'#f0f0f0', 'noteBkgColor':'#fff3cd', 'noteTextColor':'#000', 'noteBorderColor':'#000', 'actorBkg':'#ffffff', 'actorBorder':'#000', 'actorTextColor':'#000', 'actorLineColor':'#000', 'signalColor':'#000', 'signalTextColor':'#000'}}}%%
+%%{init: {'theme':'default', 'themeVariables': { 'darkMode':'false', 'primaryColor':'#fff', 'primaryTextColor':'#000', 'primaryBorderColor':'#000', 'lineColor':'#000', 'secondaryColor':'#f0f0f0', 'tertiaryColor':'#fff', 'background':'#ffffff', 'mainBkg':'#ffffff', 'secondBkg':'#f0f0f0', 'noteBkgColor':'#fff3cd', 'noteTextColor':'#000', 'noteBorderColor':'#000', 'actorBkg':'#ffffff', 'actorBorder':'#000', 'actorTextColor':'#000', 'actorLineColor':'#000', 'signalColor':'#000', 'signalTextColor':'#000', 'labelBoxBkgColor':'#ffffff', 'labelTextColor':'#000', 'loopTextColor':'#000', 'activationBkgColor':'#f0f0f0', 'activationBorderColor':'#000', 'sequenceNumberColor':'#000'}}}%%
 sequenceDiagram
     participant User as Workflow
     participant Action as Project Summary Action
