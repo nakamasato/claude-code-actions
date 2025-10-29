@@ -12,6 +12,112 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 - **Multi-Destination Output**: Post to Slack and/or Notion
 - **Cross-Organization Support**: GitHub App tokens for accessing repositories across organizations
 
+## Architecture
+
+The action follows a four-phase pipeline: data collection, prompt generation, LLM processing, and output delivery.
+
+```mermaid
+flowchart TB
+    subgraph Input ["📥 Input Phase"]
+        A1[GitHub Repositories]
+        A2[Slack Channels]
+        A3[Time Period]
+        A4[Template]
+    end
+
+    subgraph DataCollection ["🔄 Data Collection Phase"]
+        B1[GitHub API<br/>gh search prs/issues]
+        B2[Slack MCP Server<br/>conversations.history]
+        B3[github_data.json<br/>PRs & Issues]
+        B4[slack_data.json<br/>Messages & Threads]
+    end
+
+    subgraph PromptGen ["📝 Prompt Generation Phase"]
+        C1[Load Template<br/>system_prompt, output_format]
+        C2[Apply Customizations<br/>language, tone, overrides]
+        C3[Build MCP Config<br/>Slack & Notion servers]
+        C4[Generate Final Prompt<br/>+ data files + instructions]
+    end
+
+    subgraph LLM ["🤖 LLM Processing Phase"]
+        D1[Claude Code<br/>claude-sonnet-4.5]
+        D2[Read Data Files<br/>Read tool]
+        D3[Analyze & Categorize<br/>PRs, Issues, Messages]
+        D4[Generate Summary<br/>Following template]
+    end
+
+    subgraph Output ["📤 Output Phase"]
+        E1[Slack Message<br/>mcp__slack__slack_post_message]
+        E2[Notion Page Creation<br/>mcp__notion__API-post-page]
+        E3[Notion Content Addition<br/>mcp__notion__API-patch-block-children]
+    end
+
+    A1 --> B1
+    A2 --> B2
+    A3 --> B1 & B2
+    B1 --> B3
+    B2 --> B4
+
+    A4 --> C1
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+
+    B3 --> D1
+    B4 --> D1
+    C4 --> D1
+    D1 --> D2
+    D2 --> D3
+    D3 --> D4
+
+    D4 --> E1
+    D4 --> E2
+    E2 --> E3
+
+    style Input fill:#e1f5ff
+    style DataCollection fill:#fff3e0
+    style PromptGen fill:#f3e5f5
+    style LLM fill:#e8f5e9
+    style Output fill:#fce4ec
+```
+
+### Key Components
+
+1. **Data Collection**: GitHub CLI and Slack MCP server collect data in parallel
+2. **Prompt Generation**: Template system constructs context-aware prompts with output format specifications
+3. **LLM Processing**: Claude Code analyzes data, categorizes items, and generates summaries
+4. **Output Delivery**: MCP tools post formatted content to Slack and/or Notion
+
+### Data Flow
+
+```mermaid
+sequenceDiagram
+    participant User as Workflow
+    participant Action as Project Summary Action
+    participant GH as GitHub API
+    participant Slack as Slack MCP
+    participant Claude as Claude Code
+    participant Out as Output Services
+
+    User->>Action: Configure inputs
+    Action->>GH: Fetch PRs & Issues
+    GH-->>Action: github_data.json
+    Action->>Slack: Fetch messages & threads
+    Slack-->>Action: slack_data.json
+
+    Action->>Action: Load template & build prompt
+
+    Action->>Claude: Invoke with data files + prompt
+    Claude->>Claude: Read & analyze data
+    Claude->>Claude: Generate summary
+
+    Claude->>Out: Post to Slack (if configured)
+    Claude->>Out: Create Notion page (if configured)
+    Claude->>Out: Add Notion content blocks
+
+    Out-->>User: Summary posted ✓
+```
+
 ## Inputs
 
 ### Data Sources
