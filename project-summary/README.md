@@ -36,7 +36,7 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 | `template` | No | `monthly-report` | Template: `monthly-report`, `sprint-summary`, `release-notes`, `weekly-check` |
 | `system_prompt` | No | - | Custom system prompt (overrides template's system_prompt) |
 | `slack_output_format` | No | - | Custom Slack output format (overrides template's slack_output_format) |
-| `notion_title_format` | No | - | Notion page title format. Variables: `{period}`, `{start_date}`, `{end_date}`, `{template}`. Example: `"📊 {period} Report"` |
+| `notion_title_format` | No | - | Notion page title. See [Notion Title Modes](#notion-title-modes) below. |
 | `notion_output_format` | No | - | Custom Notion output format (overrides template's notion_output_format) |
 | `language` | No | - | Output language (`en`, `ja`, etc.) |
 | `tone` | No | - | Tone: `formal`, `casual`, `technical` |
@@ -44,10 +44,40 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 **Note**: You can override specific template values:
 - `system_prompt`: Customize the AI's behavior and instructions
 - `slack_output_format`: Customize Slack message format (only affects Slack output)
-- `notion_title_format`: Customize Notion page title with variables
+- `notion_title_format`: Customize Notion page title (see below)
 - `notion_output_format`: Customize Notion page content (only affects Notion output)
 - `language` and `tone`: Override template defaults
 - Specify only what you want to customize; other values use template defaults
+
+#### Notion Title Modes
+
+The `notion_title_format` parameter supports three modes:
+
+1. **Direct Title Mode** (no `{` characters):
+   ```yaml
+   notion_title_format: "Project Summary - Q1 2025"
+   ```
+   The title is used exactly as specified.
+
+2. **Variable Format Mode** (contains `{` characters):
+   ```yaml
+   notion_title_format: "{repository} ({year_month})"
+   # or
+   notion_title_format: "📊 {period} Report"
+   ```
+   AI interprets variables and available data to generate the title. Common variables:
+   - `{period}`: Full period description (e.g., "September 2025")
+   - `{start_date}`: Start date (e.g., "2025-09-01")
+   - `{end_date}`: End date (e.g., "2025-09-30")
+   - `{year_month}`: Year-month format (AI will extract from dates, e.g., "2025-09")
+   - `{template}`: Template name (e.g., "monthly-report")
+   - `{repository}`: Repository name (from workflow context)
+
+3. **Natural Language Mode** (contains `{` but with instructions):
+   ```yaml
+   notion_title_format: "Include repository name and year-month in YYYY-MM format"
+   ```
+   AI follows the natural language instruction to create the title.
 
 ### Output Configuration
 
@@ -194,14 +224,41 @@ jobs:
 ### Custom Notion Title Format
 
 ```yaml
-- name: Generate quarterly review
+# Example 1: Variable format mode - AI interprets variables
+- name: Generate monthly summary with variable format
+  uses: nakamasato/claude-code-actions/project-summary@v1
+  with:
+    github_repositories: myorg/repo
+    period: last-month
+    outputs: notion
+    notion_title_format: "${{ matrix.repository }} ({year_month})"
+    # Result: "myorg/repo (2025-09)"
+    notion_database_id: ${{ secrets.NOTION_DB_ID }}
+    notion_token: ${{ secrets.NOTION_TOKEN }}
+    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+# Example 2: Natural language mode - AI follows instructions
+- name: Generate with natural language title instruction
+  uses: nakamasato/claude-code-actions/project-summary@v1
+  with:
+    github_repositories: myorg/repo
+    period: last-month
+    outputs: notion
+    notion_title_format: "Include repository name and year-month in YYYY-MM format"
+    # Result: AI generates appropriate title like "myorg/repo 2025-09"
+    notion_database_id: ${{ secrets.NOTION_DB_ID }}
+    notion_token: ${{ secrets.NOTION_TOKEN }}
+    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+# Example 3: Direct title mode - Use as-is
+- name: Generate with direct title
   uses: nakamasato/claude-code-actions/project-summary@v1
   with:
     github_repositories: myorg/repo
     period: last-quarter
-    template: sprint-summary
     outputs: notion
-    notion_title_format: "🚀 Q{quarter} Review - {start_date} to {end_date}"
+    notion_title_format: "Q1 2025 Project Summary"
+    # Result: "Q1 2025 Project Summary" (exactly as specified)
     notion_database_id: ${{ secrets.NOTION_DB_ID }}
     notion_token: ${{ secrets.NOTION_TOKEN }}
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
