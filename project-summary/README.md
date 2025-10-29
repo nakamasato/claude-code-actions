@@ -35,14 +35,19 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 |-------|----------|---------|-------------|
 | `template` | No | `monthly-report` | Template: `monthly-report`, `sprint-summary`, `release-notes`, `weekly-check` |
 | `system_prompt` | No | - | Custom system prompt (overrides template's system_prompt) |
-| `output_format` | No | - | Custom output format (overrides template's output_format) |
+| `slack_output_format` | No | - | Custom Slack output format (overrides template's slack_output_format) |
+| `notion_title_format` | No | - | Notion page title format. Variables: `{period}`, `{start_date}`, `{end_date}`, `{template}`. Example: `"📊 {period} Report"` |
+| `notion_output_format` | No | - | Custom Notion output format (overrides template's notion_output_format) |
 | `language` | No | - | Output language (`en`, `ja`, etc.) |
 | `tone` | No | - | Tone: `formal`, `casual`, `technical` |
 
-**Note**: `system_prompt` and `output_format` override the corresponding template values. You can specify:
-- Both to create a fully custom report (template structure ignored)
-- One to partially customize (e.g., custom format with template's system prompt)
-- Neither to use the template as-is
+**Note**: You can override specific template values:
+- `system_prompt`: Customize the AI's behavior and instructions
+- `slack_output_format`: Customize Slack message format (only affects Slack output)
+- `notion_title_format`: Customize Notion page title with variables
+- `notion_output_format`: Customize Notion page content (only affects Notion output)
+- `language` and `tone`: Override template defaults
+- Specify only what you want to customize; other values use template defaults
 
 ### Output Configuration
 
@@ -184,6 +189,65 @@ jobs:
           slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
           slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+```
+
+### Custom Notion Title Format
+
+```yaml
+- name: Generate quarterly review
+  uses: nakamasato/claude-code-actions/project-summary@v1
+  with:
+    github_repositories: myorg/repo
+    period: last-quarter
+    template: sprint-summary
+    outputs: notion
+    notion_title_format: "🚀 Q{quarter} Review - {start_date} to {end_date}"
+    notion_database_id: ${{ secrets.NOTION_DB_ID }}
+    notion_token: ${{ secrets.NOTION_TOKEN }}
+    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+```
+
+### Custom Output Formats
+
+```yaml
+- name: Generate custom summary
+  uses: nakamasato/claude-code-actions/project-summary@v1
+  with:
+    github_repositories: myorg/repo
+    period: last-month
+    template: monthly-report
+    outputs: slack,notion
+    # Custom Slack format
+    slack_output_format: |
+      *Monthly Update - {period}*
+
+      We completed {pr_count} PRs this month!
+
+      *Key Achievements*
+      {achievements_list}
+
+      *Next Steps*
+      {next_steps}
+    # Custom Notion title
+    notion_title_format: "📊 Monthly Report - {period}"
+    # Custom Notion format
+    notion_output_format: |
+      # Monthly Summary
+
+      **Period:** {start_date} to {end_date}
+
+      ## Metrics
+      - PRs: {pr_count}
+      - Issues: {issue_count}
+
+      ## Highlights
+      {highlights}
+    notification_slack_channel: C1234567890
+    notion_database_id: ${{ secrets.NOTION_DB_ID }}
+    slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+    slack_team_id: ${{ secrets.SLACK_TEAM_ID }}
+    notion_token: ${{ secrets.NOTION_TOKEN }}
+    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
 
 ## Templates

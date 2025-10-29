@@ -13,17 +13,17 @@ system_prompt: |
   - 開発者名は含めない（チーム全体の成果として記載）
   - カテゴリは大まかに分けて2〜5個に分類
 
-output_format: |
+slack_output_format: |
   {month}月もお疲れ様です！ {repository_names} 活動サマリーです。合計{pr_count}のPRと{issue_count}のIssueが処理されました!
 
   *主な成果*
 
   *{category_1}*
-  • {item_1} ({pr_links})
-  • {item_2} ({pr_links})
+  • {item_1} (<https://github.com/{owner}/{repo}/pull/{number}|#{number}>)
+  • {item_2} (<https://github.com/{owner}/{repo}/pull/{number}|#{number}>)
 
   *{category_2}*
-  • {item_1} ({issue_links})
+  • {item_1} (<https://github.com/{owner}/{repo}/issues/{number}|#{number}>)
 
   *Slack活動*
   {channel_names}で{message_count}件のディスカッションがありました。
@@ -33,6 +33,55 @@ output_format: |
   • {topic_2}
 
   {closing_message}
+
+  **フォーマット要件:**
+  - 太字: *テキスト*
+  - リンク: <URL|テキスト>
+  - PR/Issueリンク: <https://github.com/{owner}/{repo}/pull/{number}|#{number}>
+  - リスト: • または -
+  - 適度に絵文字を使用
+  - セクション間は改行で区切る
+
+notion_title_format: "📊 {period}の月次レポート"
+
+notion_output_format: |
+  # 📊 月次サマリー
+
+  **期間:** {start_date} 〜 {end_date}
+  **リポジトリ:** {repository_names}
+
+  ## 📈 統計情報
+
+  - **PRs:** {pr_count}件
+  - **Issues:** {issue_count}件
+  - **Slackメッセージ:** {message_count}件
+
+  ## 🎯 主な成果
+
+  ### {category_1}
+  - {item_1} ([#{number}](https://github.com/{owner}/{repo}/pull/{number}))
+  - {item_2} ([#{number}](https://github.com/{owner}/{repo}/pull/{number}))
+
+  ### {category_2}
+  - {item_1} ([#{number}](https://github.com/{owner}/{repo}/issues/{number}))
+
+  ## 💬 Slack活動ハイライト
+
+  {channel_names}で以下のトピックについて議論がありました:
+
+  - {topic_1}
+  - {topic_2}
+
+  ## 💡 所感
+
+  {closing_message}
+
+  **フォーマット要件:**
+  - heading_2 (#) でメインセクション
+  - heading_3 (##) でサブセクション
+  - bulleted_list_item (-) でリスト
+  - calloutブロックで重要情報
+  - 見出しに絵文字を使用
 
 categories:
   - name: "機能開発"
@@ -54,49 +103,3 @@ categories:
   - name: "インフラ・運用"
     keywords: ["infra", "ci", "cd", "deploy", "インフラ", "デプロイ", "運用"]
     description: "インフラ、CI/CD、デプロイ関連"
-
-slack_format:
-  enabled: true
-  instructions: |
-    Slackに投稿する際は以下のフォーマットを使用してください:
-
-    **見出し構造:**
-    - 太字: *テキスト*
-    - リンク: <URL|テキスト>
-    - リスト: • または -
-
-    **PR/Issueリンク形式:**
-    - <https://github.com/{owner}/{repo}/pull/{number}|#{number}>
-
-    **絵文字の使用:**
-    - 適度に使用して視覚的に見やすく
-    - 過度に使用しない
-
-    **改行と空白:**
-    - セクション間は適切に改行
-    - 読みやすさを重視
-
-notion_format:
-  enabled: true
-  instructions: |
-    Notionに投稿する際は以下のブロック構造を使用してください:
-
-    **ブロックタイプ:**
-    - heading_2: メインセクション見出し
-    - heading_3: サブセクション見出し
-    - bulleted_list_item: リスト項目
-    - callout: 重要な情報（絵文字付き）
-    - paragraph: 通常のテキスト
-
-    **リンク:**
-    - PRリンクは適切にフォーマット
-
-    **見出しに絵文字:**
-    - 📊 主な成果
-    - 💬 Slack活動
-    - ⭐ 注目のトピック
-
-customization:
-  allow_custom_categories: true
-  allow_language_override: true
-  allow_tone_override: true

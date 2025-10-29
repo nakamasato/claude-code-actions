@@ -15,7 +15,7 @@ echo "Loading template: $TEMPLATE_NAME"
 # Check if template exists
 if [[ ! -f "$TEMPLATE_FILE" ]]; then
   echo "::error::Template not found: $TEMPLATE_FILE"
-  echo "Available templates: monthly-report, sprint-summary, release-notes"
+  echo "Available templates: monthly-report, sprint-summary, release-notes, weekly-check"
   exit 1
 fi
 
@@ -31,13 +31,34 @@ else
   SYSTEM_PROMPT=$(awk '/^system_prompt:/ {flag=1; next} /^[a-z_]+:/ {flag=0} flag' "$TEMPLATE_FILE" | sed 's/^  //')
 fi
 
-# output_format
-if [[ -n "$INPUT_OUTPUT_FORMAT" ]]; then
-  echo "Using custom output_format (overriding template)"
-  OUTPUT_FORMAT="$INPUT_OUTPUT_FORMAT"
+# slack_output_format
+if [[ -n "$INPUT_SLACK_OUTPUT_FORMAT" ]]; then
+  echo "Using custom slack_output_format (overriding template)"
+  SLACK_OUTPUT_FORMAT="$INPUT_SLACK_OUTPUT_FORMAT"
 else
-  echo "Extracting output_format from template"
-  OUTPUT_FORMAT=$(awk '/^output_format:/ {flag=1; next} /^[a-z_]+:/ {flag=0} flag' "$TEMPLATE_FILE" | sed 's/^  //')
+  echo "Extracting slack_output_format from template"
+  SLACK_OUTPUT_FORMAT=$(awk '/^slack_output_format:/ {flag=1; next} /^[a-z_]+:/ {flag=0} flag' "$TEMPLATE_FILE" | sed 's/^  //')
+fi
+
+# notion_title_format
+if [[ -n "$INPUT_NOTION_TITLE_FORMAT" ]]; then
+  echo "Using custom notion_title_format (overriding template)"
+  NOTION_TITLE_FORMAT="$INPUT_NOTION_TITLE_FORMAT"
+else
+  echo "Extracting notion_title_format from template"
+  NOTION_TITLE_FORMAT=$(grep "^notion_title_format:" "$TEMPLATE_FILE" | cut -d':' -f2- | xargs)
+  if [[ -z "$NOTION_TITLE_FORMAT" ]]; then
+    NOTION_TITLE_FORMAT="Project Summary - {period}"
+  fi
+fi
+
+# notion_output_format
+if [[ -n "$INPUT_NOTION_OUTPUT_FORMAT" ]]; then
+  echo "Using custom notion_output_format (overriding template)"
+  NOTION_OUTPUT_FORMAT="$INPUT_NOTION_OUTPUT_FORMAT"
+else
+  echo "Extracting notion_output_format from template"
+  NOTION_OUTPUT_FORMAT=$(awk '/^notion_output_format:/ {flag=1; next} /^[a-z_]+:/ {flag=0} flag' "$TEMPLATE_FILE" | sed 's/^  //')
 fi
 
 # Extract language
@@ -62,6 +83,7 @@ fi
 echo "TEMPLATE_NAME=$TEMPLATE_NAME" >> "$GITHUB_OUTPUT"
 echo "LANGUAGE=$LANGUAGE" >> "$GITHUB_OUTPUT"
 echo "TONE=$TONE" >> "$GITHUB_OUTPUT"
+echo "NOTION_TITLE_FORMAT=$NOTION_TITLE_FORMAT" >> "$GITHUB_OUTPUT"
 
 # Save system_prompt to output (multiline)
 {
@@ -70,11 +92,18 @@ echo "TONE=$TONE" >> "$GITHUB_OUTPUT"
   echo "EOF_SYSTEM_PROMPT"
 } >> "$GITHUB_OUTPUT"
 
-# Save output_format to output (multiline)
+# Save slack_output_format to output (multiline)
 {
-  echo "OUTPUT_FORMAT<<EOF_OUTPUT_FORMAT"
-  echo "$OUTPUT_FORMAT"
-  echo "EOF_OUTPUT_FORMAT"
+  echo "SLACK_OUTPUT_FORMAT<<EOF_SLACK_OUTPUT_FORMAT"
+  echo "$SLACK_OUTPUT_FORMAT"
+  echo "EOF_SLACK_OUTPUT_FORMAT"
+} >> "$GITHUB_OUTPUT"
+
+# Save notion_output_format to output (multiline)
+{
+  echo "NOTION_OUTPUT_FORMAT<<EOF_NOTION_OUTPUT_FORMAT"
+  echo "$NOTION_OUTPUT_FORMAT"
+  echo "EOF_NOTION_OUTPUT_FORMAT"
 } >> "$GITHUB_OUTPUT"
 
 # Save template file path for Claude Code to read
@@ -89,10 +118,16 @@ if [[ -n "$INPUT_SYSTEM_PROMPT" ]]; then
 else
   echo "  System prompt: From template"
 fi
-if [[ -n "$INPUT_OUTPUT_FORMAT" ]]; then
-  echo "  Output format: Custom (overridden)"
+if [[ -n "$INPUT_SLACK_OUTPUT_FORMAT" ]]; then
+  echo "  Slack output format: Custom (overridden)"
 else
-  echo "  Output format: From template"
+  echo "  Slack output format: From template"
+fi
+echo "  Notion title format: $NOTION_TITLE_FORMAT"
+if [[ -n "$INPUT_NOTION_OUTPUT_FORMAT" ]]; then
+  echo "  Notion output format: Custom (overridden)"
+else
+  echo "  Notion output format: From template"
 fi
 
 echo "::endgroup::"

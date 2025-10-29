@@ -12,7 +12,9 @@ TEMPLATE_NAME="${TEMPLATE_NAME}"
 LANGUAGE="${LANGUAGE}"
 TONE="${TONE}"
 SYSTEM_PROMPT="${SYSTEM_PROMPT}"
-OUTPUT_FORMAT="${OUTPUT_FORMAT}"
+SLACK_OUTPUT_FORMAT="${SLACK_OUTPUT_FORMAT:-}"
+NOTION_TITLE_FORMAT="${NOTION_TITLE_FORMAT:-Project Summary - {period}}"
+NOTION_OUTPUT_FORMAT="${NOTION_OUTPUT_FORMAT:-}"
 
 # Get data file paths
 GITHUB_DATA_FILE="${GITHUB_DATA_FILE:-}"
@@ -50,10 +52,6 @@ cat >> claude_prompt.md <<EOF
 ## System Prompt
 
 $SYSTEM_PROMPT
-
-## Output Format
-
-$OUTPUT_FORMAT
 
 EOF
 
@@ -140,36 +138,35 @@ for output in "${OUTPUTS_ARRAY[@]}"; do
 
 **Action Required**: Post the summary to Slack using the MCP tool \`mcp__slack__slack_post_message\`
 
-**Formatting**:
-- Use Slack mrkdwn format
-- Bold: \`*text*\`
-- Links: \`<URL|text>\`
-- PR/Issue links: \`<https://github.com/{owner}/{repo}/pull/{number}|#{number}>\`
-- Lists: \`•\` or \`-\`
-- Emojis for visual structure
-- Appropriate line breaks for readability
+**Output Format**:
 
-Follow the template's Slack formatting instructions.
+$SLACK_OUTPUT_FORMAT
+
+**Important**: Follow the format structure and requirements specified above. Use Slack mrkdwn format with proper formatting for links, bold text, and emojis.
 
 EOF
   fi
 
   if [[ "$output" == "notion" ]]; then
+    # Replace variables in title
+    NOTION_TITLE_REPLACED="${NOTION_TITLE_FORMAT//\{period\}/$PERIOD_DESCRIPTION}"
+    NOTION_TITLE_REPLACED="${NOTION_TITLE_REPLACED//\{start_date\}/$START_DATE}"
+    NOTION_TITLE_REPLACED="${NOTION_TITLE_REPLACED//\{end_date\}/$END_DATE}"
+    NOTION_TITLE_REPLACED="${NOTION_TITLE_REPLACED//\{template\}/$TEMPLATE_NAME}"
+
     cat >> claude_prompt.md <<EOF
 ### Notion Output
 
 **Database ID**: $INPUT_NOTION_DATABASE_ID
+**Page Title**: $NOTION_TITLE_REPLACED
 
-**Action Required**: Create a new page in the Notion database using the MCP tool \`mcp__notion__create_page\`
+**Action Required**: Create a new page in the Notion database using the MCP tool \`mcp__notion__API-post-page\`
 
-**Formatting**:
-- Use Notion blocks (heading_2, heading_3, bulleted_list_item, callout, paragraph)
-- Rich formatting with emojis in headings
-- Callouts for important information
-- Toggle blocks for detailed sections
-- Proper link formatting
+**Output Format**:
 
-Follow the template's Notion formatting instructions.
+$NOTION_OUTPUT_FORMAT
+
+**Important**: Follow the format structure and requirements specified above. Use appropriate Notion blocks (heading_2, heading_3, bulleted_list_item, callout, paragraph) with proper markdown formatting.
 
 EOF
   fi

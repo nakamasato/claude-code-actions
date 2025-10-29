@@ -44,9 +44,9 @@ if [[ " ${OUTPUTS_ARRAY[*]} " =~ " notion " ]]; then
       '. + {
         "notion": {
           "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/server-notion"],
+          "args": ["-y", "@notionhq/notion-mcp-server"],
           "env": {
-            "NOTION_API_KEY": $notion_token
+            "NOTION_TOKEN": $notion_token
           }
         }
       }')
@@ -56,9 +56,9 @@ if [[ " ${OUTPUTS_ARRAY[*]} " =~ " notion " ]]; then
       '{
         "notion": {
           "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/server-notion"],
+          "args": ["-y", "@notionhq/notion-mcp-server"],
           "env": {
-            "NOTION_API_KEY": $notion_token
+            "NOTION_TOKEN": $notion_token
           }
         }
       }')
