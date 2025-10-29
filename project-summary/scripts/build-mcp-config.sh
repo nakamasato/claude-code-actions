@@ -46,7 +46,7 @@ if [[ " ${OUTPUTS_ARRAY[*]} " =~ " notion " ]]; then
           "command": "npx",
           "args": ["-y", "@notionhq/notion-mcp-server"],
           "env": {
-            "NOTION_API_KEY": $notion_token
+            "NOTION_TOKEN": $notion_token
           }
         }
       }')
@@ -58,7 +58,7 @@ if [[ " ${OUTPUTS_ARRAY[*]} " =~ " notion " ]]; then
           "command": "npx",
           "args": ["-y", "@notionhq/notion-mcp-server"],
           "env": {
-            "NOTION_API_KEY": $notion_token
+            "NOTION_TOKEN": $notion_token
           }
         }
       }')
