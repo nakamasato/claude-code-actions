@@ -17,6 +17,7 @@ AI-powered project summaries from multiple data sources (GitHub, Slack), posted 
 The action follows a four-phase pipeline: data collection, prompt generation, LLM processing, and output delivery.
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#fff', 'primaryTextColor':'#000', 'primaryBorderColor':'#000', 'lineColor':'#000', 'secondaryColor':'#f0f0f0', 'tertiaryColor':'#fff', 'background':'#ffffff', 'mainBkg':'#ffffff', 'secondBkg':'#f0f0f0', 'tertiaryBorderColor':'#000', 'tertiaryTextColor':'#000'}}}%%
 flowchart TB
     subgraph Input ["📥 Input Phase"]
         A1[GitHub Repositories]
@@ -91,6 +92,7 @@ flowchart TB
 ### Data Flow
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#fff', 'primaryTextColor':'#000', 'primaryBorderColor':'#000', 'lineColor':'#000', 'secondaryColor':'#f0f0f0', 'tertiaryColor':'#fff', 'background':'#ffffff', 'mainBkg':'#ffffff', 'secondBkg':'#f0f0f0', 'noteBkgColor':'#fff3cd', 'noteTextColor':'#000', 'noteBorderColor':'#000', 'actorBkg':'#ffffff', 'actorBorder':'#000', 'actorTextColor':'#000', 'actorLineColor':'#000', 'signalColor':'#000', 'signalTextColor':'#000'}}}%%
 sequenceDiagram
     participant User as Workflow
     participant Action as Project Summary Action
