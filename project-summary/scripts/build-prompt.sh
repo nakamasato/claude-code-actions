@@ -166,7 +166,9 @@ EOF
 
 **Instructions**: Generate the page title based on the format pattern above and the available data. Interpret the format pattern and replace any variables (like {period}, {start_date}, {year_month}, etc.) or follow natural language instructions to create an appropriate title.
 
-**Action Required**: Create a new page in the Notion database using the MCP tool \`mcp__notion__API-post-page\`
+**Action Required**:
+1. Create a new page in the Notion database using the MCP tool \`mcp__notion__API-post-page\`
+2. Add content blocks to the page using the MCP tool \`mcp__notion__API-patch-block-children\`
 
 **Output Format**:
 
@@ -183,7 +185,9 @@ EOF
 **Database ID**: $INPUT_NOTION_DATABASE_ID
 **Page Title**: $NOTION_TITLE_FORMAT
 
-**Action Required**: Create a new page in the Notion database using the MCP tool \`mcp__notion__API-post-page\`
+**Action Required**:
+1. Create a new page in the Notion database using the MCP tool \`mcp__notion__API-post-page\`
+2. Add content blocks to the page using the MCP tool \`mcp__notion__API-patch-block-children\`
 
 **Output Format**:
 
