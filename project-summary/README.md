@@ -19,6 +19,7 @@ The action follows a four-phase pipeline: data collection, prompt generation, LL
 ```mermaid
 %%{init: {'theme':'default', 'themeVariables': { 'darkMode':'false', 'primaryColor':'#fff', 'primaryTextColor':'#000', 'primaryBorderColor':'#000', 'lineColor':'#000', 'secondaryColor':'#f0f0f0', 'tertiaryColor':'#fff', 'background':'#ffffff', 'mainBkg':'#ffffff', 'secondBkg':'#f0f0f0', 'tertiaryBorderColor':'#000', 'tertiaryTextColor':'#000', 'clusterBkg':'#fff', 'clusterBorder':'#000', 'titleColor':'#000', 'edgeLabelBackground':'#ffffff'}}}%%
 flowchart TB
+    subgraph WhiteBg [" "]
     subgraph Input ["📥 Input Phase"]
         A1[GitHub Repositories]
         A2[Slack Channels]
@@ -74,7 +75,9 @@ flowchart TB
     D4 --> E1
     D4 --> E2
     E2 --> E3
+    end
 
+    style WhiteBg fill:#ffffff,stroke:#ffffff,color:#000
     style Input fill:#e1f5ff,stroke:#000,color:#000
     style DataCollection fill:#fff3e0,stroke:#000,color:#000
     style PromptGen fill:#f3e5f5,stroke:#000,color:#000
@@ -121,6 +124,7 @@ sequenceDiagram
     participant Claude as Claude Code
     participant Out as Output Services
 
+    rect rgb(255, 255, 255)
     User->>Action: Configure inputs
     Action->>GH: Fetch PRs & Issues
     GH-->>Action: github_data.json
@@ -138,6 +142,7 @@ sequenceDiagram
     Claude->>Out: Add Notion content blocks
 
     Out-->>User: Summary posted ✓
+    end
 ```
 
 ## Inputs
