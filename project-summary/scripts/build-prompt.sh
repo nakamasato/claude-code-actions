@@ -160,7 +160,7 @@ EOF
 **Database ID**: $INPUT_NOTION_DATABASE_ID
 **Page Title**: $NOTION_TITLE_REPLACED
 
-**Action Required**: Create a new page in the Notion database using the MCP tool \`mcp__notion__create_page\`
+**Action Required**: Create a new page in the Notion database using the MCP tool \`mcp__notion__API-post-page\`
 
 **Output Format**:
 

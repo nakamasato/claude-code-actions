@@ -277,7 +277,7 @@ project-summary/
 
 **Allowed Tools for Claude Code:**
 ```
-Bash,Grep,Glob,Read,Write,Edit,MultiEdit,LS,Task,TodoRead,TodoWrite,mcp__slack__slack_post_message,mcp__notion__create_page
+Bash,Grep,Glob,Read,Write,Edit,MultiEdit,LS,Task,TodoRead,TodoWrite,mcp__slack__slack_post_message,mcp__notion__API-post-page
 ```
 
 ---
