@@ -148,17 +148,23 @@ EOF
   fi
 
   if [[ "$output" == "notion" ]]; then
-    # Replace variables in title
-    NOTION_TITLE_REPLACED="${NOTION_TITLE_FORMAT//\{period\}/$PERIOD_DESCRIPTION}"
-    NOTION_TITLE_REPLACED="${NOTION_TITLE_REPLACED//\{start_date\}/$START_DATE}"
-    NOTION_TITLE_REPLACED="${NOTION_TITLE_REPLACED//\{end_date\}/$END_DATE}"
-    NOTION_TITLE_REPLACED="${NOTION_TITLE_REPLACED//\{template\}/$TEMPLATE_NAME}"
-
-    cat >> claude_prompt.md <<EOF
+    # Check if title format contains variables (format mode) or is a direct title
+    if [[ "$NOTION_TITLE_FORMAT" == *"{"* ]]; then
+      # Format mode: LLM should generate title based on format and data
+      cat >> claude_prompt.md <<EOF
 ### Notion Output
 
 **Database ID**: $INPUT_NOTION_DATABASE_ID
-**Page Title**: $NOTION_TITLE_REPLACED
+
+**Page Title Format**: $NOTION_TITLE_FORMAT
+
+**Available Data for Title Generation**:
+- period: $PERIOD_DESCRIPTION
+- start_date: $START_DATE
+- end_date: $END_DATE
+- template: $TEMPLATE_NAME
+
+**Instructions**: Generate the page title based on the format pattern above and the available data. Interpret the format pattern and replace any variables (like {period}, {start_date}, {year_month}, etc.) or follow natural language instructions to create an appropriate title.
 
 **Action Required**: Create a new page in the Notion database using the MCP tool \`mcp__notion__API-post-page\`
 
@@ -169,6 +175,24 @@ $NOTION_OUTPUT_FORMAT
 **Important**: Follow the format structure and requirements specified above. Use appropriate Notion blocks (heading_2, heading_3, bulleted_list_item, callout, paragraph) with proper markdown formatting.
 
 EOF
+    else
+      # Direct mode: use title as-is
+      cat >> claude_prompt.md <<EOF
+### Notion Output
+
+**Database ID**: $INPUT_NOTION_DATABASE_ID
+**Page Title**: $NOTION_TITLE_FORMAT
+
+**Action Required**: Create a new page in the Notion database using the MCP tool \`mcp__notion__API-post-page\`
+
+**Output Format**:
+
+$NOTION_OUTPUT_FORMAT
+
+**Important**: Follow the format structure and requirements specified above. Use appropriate Notion blocks (heading_2, heading_3, bulleted_list_item, callout, paragraph) with proper markdown formatting.
+
+EOF
+    fi
   fi
 done
 

@@ -41,7 +41,7 @@ inputs:
     required: false
 
   notion_title_format:
-    description: 'Notion page title format. Variables: {period}, {start_date}, {end_date}, {template}. Example: "📊 {period} Report"'
+    description: 'Notion page title. Can be: 1) Direct title (e.g., "Project Summary"), 2) Format with variables (e.g., "{repository} ({year_month})"), or 3) Natural language instruction (e.g., "Include repository name and year-month"). Available data: period, start_date, end_date, template.'
     required: false
 
   notion_output_format:
