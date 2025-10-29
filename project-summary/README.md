@@ -119,17 +119,22 @@ flowchart TB
 sequenceDiagram
     participant User as Workflow
     participant Action as Project Summary Action
+    box rgba(255, 243, 224, 0.5) Data Source APIs
     participant GH as GitHub API
-    participant Slack as Slack MCP
+    participant SlackAPI as Slack API
+    end
     participant Claude as Claude Code
-    participant Out as Output Services
+    box rgba(252, 228, 236, 0.5) Output MCP Servers
+    participant SlackMCP as Slack MCP
+    participant NotionMCP as Notion MCP
+    end
 
     rect rgb(255, 255, 255)
     User->>Action: Configure inputs
     Action->>GH: Fetch PRs & Issues
     GH-->>Action: github_data.json
-    Action->>Slack: Fetch messages & threads
-    Slack-->>Action: slack_data.json
+    Action->>SlackAPI: Fetch messages & threads
+    SlackAPI-->>Action: slack_data.json
 
     Action->>Action: Load template & build prompt
 
@@ -137,11 +142,14 @@ sequenceDiagram
     Claude->>Claude: Read & analyze data
     Claude->>Claude: Generate summary
 
-    Claude->>Out: Post to Slack (if configured)
-    Claude->>Out: Create Notion page (if configured)
-    Claude->>Out: Add Notion content blocks
+    Claude->>SlackMCP: Post message (if configured)
+    SlackMCP-->>Claude: ✓ Posted
+    Claude->>NotionMCP: Create page (if configured)
+    NotionMCP-->>Claude: ✓ Page created
+    Claude->>NotionMCP: Add content blocks
+    NotionMCP-->>Claude: ✓ Content added
 
-    Out-->>User: Summary posted ✓
+    Claude-->>User: Summary posted ✓
     end
 ```
 
